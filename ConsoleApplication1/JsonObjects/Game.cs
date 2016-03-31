@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,8 @@ namespace ConsoleApplication1.JsonObjects
 {
     public class Game
     {
-        public FellowPlayer[] fellowPlayers { get; set; }
+        [JsonProperty("fellowPlayers")]
+        public TeamMates[] TeamMates { get; set; }
         public string gameType { get; set; }
         public Stats stats { get; set; }
         public long gameId { get; set; }

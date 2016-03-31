@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleApplication1.JsonObjects
 {
-    public class FellowPlayer
+    public class TeamMates
     {
         // TODO
     }
