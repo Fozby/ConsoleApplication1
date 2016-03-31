@@ -37,6 +37,7 @@ namespace ConsoleApplication1
             Response_RecentGames recentGames = JsonConvert.DeserializeObject<Response_RecentGames>(output);
             Stats s = recentGames.games.Select(a => a.stats).FirstOrDefault();
             Console.WriteLine($"Kills: {s.championsKilled}, Deaths: {s.numDeaths}, Assists: {s.assists}");
+            Console.WriteLine(s.ToJson());
 
 
             //Mongo mongo = new Mongo();
