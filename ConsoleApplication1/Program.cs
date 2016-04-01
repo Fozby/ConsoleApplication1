@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ConsoleApplication1.JsonObjects;
 using RestSharp;
+using MongoDB.Bson.Serialization;
 
 namespace ConsoleApplication1
 {
@@ -26,33 +27,48 @@ namespace ConsoleApplication1
             RestClient restClient = new RestClient(baseUri);
             RestRequest request = new RestRequest(resource, Method.GET);
             IRestResponse<Response_RecentGames> response = restClient.Execute<Response_RecentGames>(request);
-            
-            Game game = response.Data.games.FirstOrDefault();
+
+            List<Game> games = response.Data.games;
+            Game game = games.FirstOrDefault();
             Stats s = game.stats;
             Console.WriteLine($"Kills: {s.championsKilled}, Deaths: {s.numDeaths}, Assists: {s.assists}");
 
+            Mongo mongo = new Mongo();
 
-            //Mongo mongo = new Mongo();
+            while (true)
+            {
+                string input = Console.ReadLine();
 
-            //while (true)
-            //{
-            //    String input = Console.ReadLine();
+                if (input == "add")
+                {
+                    Task.Run(async () => await mongo.insertGame(game));
+                }
+                if (input == "addAll")
+                {
+                    Task.Run(async () => await mongo.insertGames(games));
+                }
+                if (input == "get")
+                {
+                    Task.Run(async () => await mongo.getRec());
+                }
+                if (input == "insert")
+                {
+                    Task.Run(async () => await mongo.insertRec());
+                }
+                if (input == "count")
+                {
+                    Task.Run(async () => await mongo.getCount());
+                }
+                if (input == "remove")
+                {
+                    Task.Run(async () => 
+                    {
+                        await mongo.removeAll();
+                        await mongo.getCount();
+                    });
+                }
+            }
 
-            //    if (input == "get")
-            //    {
-            //        Task.Run(async () => await mongo.getRec());
-            //    }
-            //    if (input == "insert")
-            //    {
-            //        Task.Run(async () => await mongo.insertRec());
-            //    }
-            //    if (input == "count")
-            //    {
-            //        Task.Run(async () => await mongo.getCount());
-            //    }
-            //}
-            Console.WriteLine("done");
-            Console.ReadLine();
         }
     }
 

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using ConsoleApplication1.JsonObjects;
 
 namespace ConsoleApplication1
 {
@@ -40,6 +41,16 @@ namespace ConsoleApplication1
             Console.WriteLine("Finished adding");
         }
 
+        public async Task insertGame(Game game)
+        {
+            await theCollection.InsertOneAsync(game.ToBsonDocument());
+        }
+
+        public async Task insertGames(List<Game> games)
+        {
+            await theCollection.InsertManyAsync(???);
+        }
+
         public async Task getRec()
         {
             var getDoc = await theCollection.Find(new BsonDocument()).FirstOrDefaultAsync();
@@ -50,6 +61,11 @@ namespace ConsoleApplication1
         {
             long count = await theCollection.CountAsync(new BsonDocument());
             Console.WriteLine(count.ToString());
+        }
+
+        public async Task removeAll()
+        {
+            await theCollection.DeleteManyAsync(new BsonDocument());
         }
     }
 }
