@@ -17,8 +17,6 @@ namespace ConsoleApplication1
         private IMongoDatabase theDataBase;
         private IMongoCollection<Game> theCollection;
 
-        public object JsonRequestBehavior { get; private set; }
-
         public Mongo()
         {
             theClient = new MongoClient("mongodb://localhost:27017");
@@ -52,7 +50,6 @@ namespace ConsoleApplication1
             }
         }
 
-        
         public async Task insertGames(List<Game> games)
         {
             //IEnumerable<BsonDocument> bsons = games.Where(game => game.stats.win == true).Select(a => a);
@@ -67,20 +64,15 @@ namespace ConsoleApplication1
             Console.WriteLine(game.ToJson()); 
         }
 
-        private object Json(IMongoQueryable<Game> documents, object allowGet)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task getCount()
         {
-            long count = await theCollection.CountAsync(new BsonDocument());
+            long count = await theCollection.CountAsync(Builders<Game>.Filter.Empty);
             Console.WriteLine(count.ToString());
         }
 
         public async Task removeAll()
         {
-            await theCollection.DeleteManyAsync(new BsonDocument());
+            await theCollection.DeleteManyAsync(Builders<Game>.Filter.Empty);
         }
     }
 }
