@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using ConsoleApplication1.JsonObjects;
+using MongoDB.Driver.Builders;
+using MongoDB.Driver.Linq;
 
 namespace ConsoleApplication1
 {
@@ -13,49 +15,61 @@ namespace ConsoleApplication1
     { 
         private MongoClient theClient;
         private IMongoDatabase theDataBase;
-        private IMongoCollection<BsonDocument> theCollection;
+        private IMongoCollection<Game> theCollection;
+
+        public object JsonRequestBehavior { get; private set; }
 
         public Mongo()
         {
             theClient = new MongoClient("mongodb://localhost:27017");
-            theDataBase = theClient.GetDatabase("foo");
-            theCollection = theDataBase.GetCollection<BsonDocument>("bar");
+            theDataBase = theClient.GetDatabase("Riot");
+            theCollection = theDataBase.GetCollection<Game>("Games");
+           
+            handleIndexes();
         }
 
-        public async Task insertRec()
+        private void handleIndexes()
         {
-            var document = new BsonDocument
+            //Add gameId as a Unique Index (Primary Key)
+            if (theCollection.Indexes.List().ToList().Count == 0)
             {
-                { "name", "MongoDB" },
-                { "type", "Database" },
-                { "count", 1 },
-                { "info", new BsonDocument
-                          {
-                              { "x", 203 },
-                              { "y", 102 }
-                          }}
-            };
-
-            Console.WriteLine("About to add");
-            await theCollection.InsertOneAsync(document);
-            Console.WriteLine("Finished adding");
+                CreateIndexOptions cio = new CreateIndexOptions();
+                cio.Unique = true;
+                theCollection.Indexes.CreateOneAsync(Builders<Game>.IndexKeys.Ascending(_ => _.gameId), cio);
+            }
         }
 
         public async Task insertGame(Game game)
         {
-            await theCollection.InsertOneAsync(game.ToBsonDocument());
+            try
+            {
+                await theCollection.InsertOneAsync(game);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
+        
         public async Task insertGames(List<Game> games)
         {
-            IEnumerable<BsonDocument> bsons = games.Select(a => a.ToBsonDocument());
-            await theCollection.InsertManyAsync(bsons);
+            //IEnumerable<BsonDocument> bsons = games.Where(game => game.stats.win == true).Select(a => a);
+          await theCollection.InsertManyAsync(games);
         }
+
 
         public async Task getRec()
         {
-            var getDoc = await theCollection.Find(new BsonDocument()).FirstOrDefaultAsync();
-            Console.WriteLine(getDoc.ToString());
+            var games = await theCollection.Find(Builders<Game>.Filter.Empty).ToListAsync();
+            var game = games.ElementAt(0);
+            Console.WriteLine(game.ToJson()); 
+        }
+
+        private object Json(IMongoQueryable<Game> documents, object allowGet)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task getCount()
