@@ -27,7 +27,8 @@ namespace ConsoleApplication1
             RestRequest request = new RestRequest(resource, Method.GET);
             IRestResponse<Response_RecentGames> response = restClient.Execute<Response_RecentGames>(request);
             
-            Stats s = response.Data.games.Select(a => a.stats).FirstOrDefault();
+            Game game = response.Data.games.FirstOrDefault();
+            Stats s = game.stats;
             Console.WriteLine($"Kills: {s.championsKilled}, Deaths: {s.numDeaths}, Assists: {s.assists}");
 
 

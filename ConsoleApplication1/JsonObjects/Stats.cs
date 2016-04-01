@@ -5,7 +5,7 @@ namespace ConsoleApplication1.JsonObjects
 {
     public class Stats
     {
-        public int assistances { get; set; }
+        public int assists { get; set; }
         [DeserializeAs(Name = "barracksKilled")]
         public int inhibsKilled { get; set; }
         public int bountyLevel { get; set; }
