@@ -8,7 +8,7 @@ namespace ConsoleApplication1.JsonObjects
 {
     public class Response_RecentGames
     {
-        public Game[] games { get; set; }
+        public List<Game> games { get; set; }
         public long summonerId { get; set; }
     }
 }
