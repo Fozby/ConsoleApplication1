@@ -48,7 +48,8 @@ namespace ConsoleApplication1
 
         public async Task insertGames(List<Game> games)
         {
-            await theCollection.InsertManyAsync(???);
+            IEnumerable<BsonDocument> bsons = games.Select(a => a.ToBsonDocument());
+            await theCollection.InsertManyAsync(bsons);
         }
 
         public async Task getRec()
