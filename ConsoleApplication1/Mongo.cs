@@ -44,9 +44,20 @@ namespace ConsoleApplication1
                 await theCollection.InsertOneAsync(game);
 
             }
+            catch (MongoWriteException e)
+            {
+                if(e.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                {
+                    Console.WriteLine("Error adding Game with GameID: [" + game.gameId + "]. Duplicate Game already exists.");
+                }
+                else
+                {
+                    Console.WriteLine("Unhandled exception inserting Game with GameID: [" + game.gameId + "]." + e);
+                }
+            }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine("Unhandled exception inserting Game with GameID: [" + game.gameId + "]." + e);
             }
         }
 
