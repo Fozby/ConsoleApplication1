@@ -1,9 +1,13 @@
-﻿namespace ConsoleApplication1.JsonObjects
+﻿using RestSharp.Deserializers;
+using System.Xml.Serialization;
+
+namespace ConsoleApplication1.JsonObjects
 {
     public class Stats
     {
-        public int assists { get; set; }
-        public int barracksKilled { get; set; }
+        public int assistances { get; set; }
+        [DeserializeAs(Name = "barracksKilled")]
+        public int inhibsKilled { get; set; }
         public int bountyLevel { get; set; }
         public int championsKilled { get; set; }
         public int combatPlayerScore { get; set; }
