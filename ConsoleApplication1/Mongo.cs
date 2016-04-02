@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using ConsoleApplication1.JsonObjects;
-using MongoDB.Driver.Builders;
-using MongoDB.Driver.Linq;
+
 
 namespace ConsoleApplication1
 {
@@ -37,12 +35,13 @@ namespace ConsoleApplication1
             }
         }
 
-        public async Task insertGame(Game game)
+        public bool insertGame(Game game)
         {
             try
             {
-                await theCollection.InsertOneAsync(game);
-
+                theCollection.InsertOne(game);
+                Console.WriteLine("Added game: " + game.gameId);
+                return true;
             }
             catch (MongoWriteException e)
             {
@@ -55,35 +54,40 @@ namespace ConsoleApplication1
                     Console.WriteLine("Unhandled exception inserting Game with GameID: [" + game.gameId + "]." + e);
                 }
             }
-            catch (Exception e)
+
+            return false;
+        }
+
+        public void insertGames(List<Game> games)
+        {
+            int numAdded = 0;
+            foreach(Game game in games)
             {
-                Console.WriteLine("Unhandled exception inserting Game with GameID: [" + game.gameId + "]." + e);
+                if (insertGame(game))
+                {
+                    numAdded++;
+                }
             }
+
+            Console.WriteLine("Added " + numAdded + " / " + games.Count + " games");
         }
 
-        public async Task insertGames(List<Game> games)
+        public Game getGame()
         {
-            //IEnumerable<BsonDocument> bsons = games.Where(game => game.stats.win == true).Select(a => a);
-          await theCollection.InsertManyAsync(games);
-        }
-
-
-        public async Task getRec()
-        {
-            var games = await theCollection.Find(Builders<Game>.Filter.Empty).ToListAsync();
+            var games = theCollection.Find(Builders<Game>.Filter.Empty).ToList();
             var game = games.ElementAt(0);
-            Console.WriteLine(game.ToJson()); 
+            return game;
         }
 
-        public async Task getCount()
+        public long getCount()
         {
-            long count = await theCollection.CountAsync(Builders<Game>.Filter.Empty);
-            Console.WriteLine(count.ToString());
+            return theCollection.Count(Builders<Game>.Filter.Empty);
         }
 
-        public async Task removeAll()
+        public void removeAll()
         {
-            await theCollection.DeleteManyAsync(Builders<Game>.Filter.Empty);
+            theCollection.DeleteMany(Builders<Game>.Filter.Empty);
+            Console.WriteLine("Removed all Games from DB");
         }
     }
 }

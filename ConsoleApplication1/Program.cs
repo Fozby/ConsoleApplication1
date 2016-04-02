@@ -1,65 +1,67 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using ConsoleApplication1.JsonObjects;
-using RestSharp;
-using MongoDB.Bson.Serialization;
 
 namespace ConsoleApplication1
 {
     class Program
     {
+        private void timerEvent()
+        {
+
+        }
+
         static void Main(string[] args)
         {
             try
             {
-
-
+                Console.WriteLine("Starting...");
                 Riot riot = new Riot();
-
-                List<Game> games = riot.getRecentGames();
-
-                Console.WriteLine("Ready for commands...");
-
-
                 Mongo mongo = new Mongo();
 
+                Console.WriteLine("Loading recent games...");
+                List<Game> games = riot.getRecentGames();
+
+                Console.WriteLine("Adding recent games...");
+                mongo.insertGames(games);
+
+                Console.WriteLine("Starting 1 hour timer...");
+
+                while (true)
+                {
+                    Thread.Sleep(3600000);
+                    Console.WriteLine("Adding recent games...");
+                    mongo.insertGames(riot.getRecentGames());
+                }
+
+                /*
                 while (true)
                 {
                     string input = Console.ReadLine();
 
                     if (input == "add")
                     {
-                        Task.Run(async () => await mongo.insertGame(games[0]));
+                        mongo.insertGame(games[0]);
                     }
                     if (input == "addAll")
                     {
-                        Task.Run(async () => await mongo.insertGames(games));
+                        mongo.insertGames(games);
                     }
                     if (input == "get")
                     {
-                        Task.Run(async () => await mongo.getRec());
+                        Console.WriteLine(mongo.getGame().ToJson());
                     }
                     if (input == "count")
                     {
-                        Task.Run(async () => await mongo.getCount());
+                        Console.WriteLine("Count = " + mongo.getCount());
                     }
                     if (input == "remove")
                     {
-                        Task.Run(async () =>
-                        {
-                            await mongo.removeAll();
-                            await mongo.getCount();
-                        });
+                        mongo.removeAll();
                     }
                 }
+                */
 
             }
 
