@@ -14,61 +14,55 @@ namespace ConsoleApplication1
 
         static void Main(string[] args)
         {
-            try
+
+            Console.WriteLine("Starting...");
+            Riot riot = new Riot();
+            Mongo mongo = new Mongo();
+
+            Console.WriteLine("Loading recent games...");
+            List<Game> games = riot.getRecentGames();
+
+            Console.WriteLine("Adding recent games...");
+            mongo.insertGames(games);
+
+            Console.WriteLine("Starting 1 hour timer...");
+
+            while (true)
             {
-                Console.WriteLine("Starting...");
-                Riot riot = new Riot();
-                Mongo mongo = new Mongo();
-
-                Console.WriteLine("Loading recent games...");
-                List<Game> games = riot.getRecentGames();
-
+                Thread.Sleep(3600000);
                 Console.WriteLine("Adding recent games...");
-                mongo.insertGames(games);
-
-                Console.WriteLine("Starting 1 hour timer...");
-
-                while (true)
-                {
-                    Thread.Sleep(3600000);
-                    Console.WriteLine("Adding recent games...");
-                    mongo.insertGames(riot.getRecentGames());
-                }
-
-                /*
-                while (true)
-                {
-                    string input = Console.ReadLine();
-
-                    if (input == "add")
-                    {
-                        mongo.insertGame(games[0]);
-                    }
-                    if (input == "addAll")
-                    {
-                        mongo.insertGames(games);
-                    }
-                    if (input == "get")
-                    {
-                        Console.WriteLine(mongo.getGame().ToJson());
-                    }
-                    if (input == "count")
-                    {
-                        Console.WriteLine("Count = " + mongo.getCount());
-                    }
-                    if (input == "remove")
-                    {
-                        mongo.removeAll();
-                    }
-                }
-                */
-
+                mongo.insertGames(riot.getRecentGames());
             }
 
-            catch (Exception e)
+            /*
+            while (true)
             {
-                Console.WriteLine("Error: " + e);
+                string input = Console.ReadLine();
+
+                if (input == "add")
+                {
+                    mongo.insertGame(games[0]);
+                }
+                if (input == "addAll")
+                {
+                    mongo.insertGames(games);
+                }
+                if (input == "get")
+                {
+                    Console.WriteLine(mongo.getGame().ToJson());
+                }
+                if (input == "count")
+                {
+                    Console.WriteLine("Count = " + mongo.getCount());
+                }
+                if (input == "remove")
+                {
+                    mongo.removeAll();
+                }
             }
+            */
+
+
         }
     }
 
