@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleApplication2
+namespace ConsoleApplication1
 {
-    class Program
+    class RawStatsDto
     {
-        static void Main(string[] args)
-        {
-        }
+        public string assists { get; set; }
     }
 }
