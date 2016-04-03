@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using ConsoleApplication1.JsonObjects;
-
+using ConsoleApplication1.JsonObjects.MatchObjects;
 
 namespace ConsoleApplication1
 {
@@ -13,25 +11,35 @@ namespace ConsoleApplication1
     { 
         private MongoClient theClient;
         private IMongoDatabase theDataBase;
-        private IMongoCollection<Game> theCollection;
+        private IMongoCollection<Game> gameCollection;
+        private IMongoCollection<MatchDetails> matchCollection;
 
         public Mongo()
         {
             theClient = new MongoClient("mongodb://localhost:27017");
             theDataBase = theClient.GetDatabase("Riot");
-            theCollection = theDataBase.GetCollection<Game>("Games");
-           
+            gameCollection = theDataBase.GetCollection<Game>("Games");
+            matchCollection = theDataBase.GetCollection<MatchDetails>("Matches");
+
             handleIndexes();
         }
 
         private void handleIndexes()
         {
             //Add gameId as a Unique Index (Primary Key)
-            if (theCollection.Indexes.List().ToList().Count == 0)
+            if (gameCollection.Indexes.List().ToList().Count == 0)
             {
                 CreateIndexOptions cio = new CreateIndexOptions();
                 cio.Unique = true;
-                theCollection.Indexes.CreateOneAsync(Builders<Game>.IndexKeys.Ascending(_ => _.gameId), cio);
+                gameCollection.Indexes.CreateOneAsync(Builders<Game>.IndexKeys.Ascending(_ => _.gameId), cio);
+            }
+
+            //Add matchId as a Unique Index (Primary Key)
+            if (matchCollection.Indexes.List().ToList().Count == 0)
+            {
+                CreateIndexOptions cio = new CreateIndexOptions();
+                cio.Unique = true;
+                matchCollection.Indexes.CreateOneAsync(Builders<MatchDetails>.IndexKeys.Ascending(_ => _.matchId), cio);
             }
         }
 
@@ -39,15 +47,15 @@ namespace ConsoleApplication1
         {
             try
             {
-                theCollection.InsertOne(game);
-                Console.WriteLine("Added game: " + game.gameId);
+                gameCollection.InsertOne(game);
                 return true;
             }
             catch (MongoWriteException e)
             {
                 if(e.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
-                    Console.WriteLine("Error adding Game with GameID: [" + game.gameId + "]. Duplicate Game already exists.");
+                    //Comment out for now, too much spam
+                    //Console.WriteLine("Error adding Game with GameID: [" + game.gameId + "]. Duplicate Game already exists.");
                 }
                 else
                 {
@@ -74,20 +82,52 @@ namespace ConsoleApplication1
 
         public Game getGame()
         {
-            var games = theCollection.Find(Builders<Game>.Filter.Empty).ToList();
+            var games = gameCollection.Find(Builders<Game>.Filter.Empty).ToList();
             var game = games.ElementAt(0);
             return game;
         }
 
-        public long getCount()
+        public List<Game> getAllGames()
         {
-            return theCollection.Count(Builders<Game>.Filter.Empty);
+            var games = gameCollection.Find(Builders<Game>.Filter.Empty).ToList();
+            return games;
         }
 
-        public void removeAll()
+        public long getCount()
         {
-            theCollection.DeleteMany(Builders<Game>.Filter.Empty);
-            Console.WriteLine("Removed all Games from DB");
+            return gameCollection.Count(Builders<Game>.Filter.Empty);
+        }
+
+        public void addMatch(MatchDetails match)
+        {
+            try
+            {
+                matchCollection.InsertOne(match);
+            }
+            catch (MongoWriteException e)
+            {
+                if (e.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                {
+                    //Comment out for now, too much spam
+                    //Console.WriteLine("Error adding Match with matchId: [" + match.matchId + "]. Duplicate Game already exists.");
+                }
+                else
+                {
+                    Console.WriteLine("Unhandled exception inserting Match with matchId: [" + match.matchId + "]." + e);
+                }
+            }
+        }
+
+        public MatchDetails getMatch(long matchId)
+        {
+            var matches = matchCollection.Find(Builders<MatchDetails>.Filter.Eq("matchId", matchId)).ToList();
+            var match = matches.ElementAt(0);
+            return match;
+        }
+
+        public long getMatchCount()
+        {
+            return matchCollection.Count(Builders<MatchDetails>.Filter.Empty);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ConsoleApplication1.JsonObjects;
+using ConsoleApplication1.JsonObjects.MatchObjects;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,8 @@ namespace ConsoleApplication1
 
         private const string BASE_URI = "https://" + REGION + ".api.pvp.net/";
         private const string RECENT_GAMES_RESOURCE = "api/lol/" + REGION + "/v1.3/game/by-summoner/{0}/recent?api_key=" + API_KEY;
+        private const string MATCH_RESOURCE = "api/lol/" + REGION + "/v2.2/match/{0}?api_key=" + API_KEY;
+
 
         private RestClient myRestClient = new RestClient(BASE_URI);
         
@@ -55,15 +58,41 @@ namespace ConsoleApplication1
             return new List<Game>();
         }
         
-        public List<Game> getRecentGamesForOthers()
+        public List<Game> getRecentGamesForAllPlayers()
         {
-            List<Game> games = getRecentGames(SUMMONER_ID_PHYTHE);
+            List<Game> games = getRecentGames(SUMMONER_ID_ETARAM);
+            games.AddRange(getRecentGames(SUMMONER_ID_PHYTHE));
             games.AddRange(getRecentGames(SUMMONER_ID_MIROTICA));
             games.AddRange(getRecentGames(SUMMONER_ID_CELINAR));
             games.AddRange(getRecentGames(SUMMONER_ID_SCORILOUS));
             games.AddRange(getRecentGames(SUMMONER_ID_DRUZOR));
 
             return games;
+        }
+
+        public MatchDetails getMatch(long gameId)
+        {
+            string resource = String.Format(MATCH_RESOURCE, gameId);
+
+            RestRequest request = new RestRequest(resource, Method.GET);
+            IRestResponse<MatchDetails> response = myRestClient.Execute<MatchDetails>(request);
+
+            RiotHttpStatusCode statusCode = (RiotHttpStatusCode)response.StatusCode;
+
+            switch (statusCode)
+            {
+                case RiotHttpStatusCode.OK: //200
+                    {
+                        return response.Data;
+                    }
+                default:
+                    {
+                        Console.Error.WriteLine($"Response returned status: {statusCode}");
+                        break;
+                    }
+            }
+
+            return null;
         }
 
     }
