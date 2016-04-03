@@ -3,6 +3,7 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,7 +38,21 @@ namespace ConsoleApplication1
             RestRequest request = new RestRequest(resource, Method.GET);
             IRestResponse<Response_RecentGames> response = myRestClient.Execute<Response_RecentGames>(request);
 
-            return response.Data.games;
+            RiotHttpStatusCode statusCode = (RiotHttpStatusCode)response.StatusCode;
+
+            switch (statusCode)
+            {
+                case RiotHttpStatusCode.OK: //200
+                    {
+                        return response.Data.games;
+                    }
+                default:
+                    {
+                        Console.Error.WriteLine($"Response returned status: {statusCode}");
+                        break;
+                    }
+            }
+            return new List<Game>();
         }
         
         public List<Game> getRecentGamesForOthers()
