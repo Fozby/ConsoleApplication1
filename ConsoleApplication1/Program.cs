@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using ConsoleApplication1.JsonObjects;
+using MongoDB.Bson;
 
 namespace ConsoleApplication1
 {
@@ -20,22 +21,30 @@ namespace ConsoleApplication1
                 Riot riot = new Riot();
                 Mongo mongo = new Mongo();
 
-                Console.WriteLine("Loading recent games...");
+                Console.WriteLine("Loading recent games (etaram)...");
                 List<Game> games = riot.getRecentGames();
 
-                Console.WriteLine("Adding recent games...");
+                Console.WriteLine("Adding recent games (others)...");
+                mongo.insertGames(games);
+
+                Console.WriteLine("Loading recent games (etaram)...");
+                games = riot.getRecentGamesForOthers();
+
+                Console.WriteLine("Adding recent games (others)...");
                 mongo.insertGames(games);
 
                 Console.WriteLine("Starting 1 hour timer...");
 
+                /*
                 while (true)
                 {
                     Thread.Sleep(3600000);
                     Console.WriteLine("Adding recent games...");
                     mongo.insertGames(riot.getRecentGames());
                 }
+                */
 
-                /*
+                
                 while (true)
                 {
                     string input = Console.ReadLine();
@@ -61,15 +70,20 @@ namespace ConsoleApplication1
                         mongo.removeAll();
                     }
                 }
-                */
+                
 
             }
 
             catch (Exception e)
             {
                 Console.WriteLine("Error: " + e);
+               
             }
+
+            Console.ReadLine();
+
         }
+
     }
 
 }

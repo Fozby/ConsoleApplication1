@@ -13,6 +13,11 @@ namespace ConsoleApplication1
         private const string API_KEY = "9b995c6c-7e5a-4c7a-b905-aab1928af045";
         private const string REGION = "oce";
         private const long SUMMONER_ID_ETARAM = 356367;
+        private const long SUMMONER_ID_PHYTHE = 557862;
+        private const long SUMMONER_ID_CELINAR = 692409;
+        private const long SUMMONER_ID_MIROTICA = 464473;
+        private const long SUMMONER_ID_SCORILOUS = 470159;
+        private const long SUMMONER_ID_DRUZOR = 485547;
 
         private const string BASE_URI = "https://" + REGION + ".api.pvp.net/";
         private const string RECENT_GAMES_RESOURCE = "api/lol/" + REGION + "/v1.3/game/by-summoner/{0}/recent?api_key=" + API_KEY;
@@ -35,7 +40,16 @@ namespace ConsoleApplication1
             return response.Data.games;
         }
         
+        public List<Game> getRecentGamesForOthers()
+        {
+            List<Game> games = getRecentGames(SUMMONER_ID_PHYTHE);
+            games.AddRange(getRecentGames(SUMMONER_ID_MIROTICA));
+            games.AddRange(getRecentGames(SUMMONER_ID_CELINAR));
+            games.AddRange(getRecentGames(SUMMONER_ID_SCORILOUS));
+            games.AddRange(getRecentGames(SUMMONER_ID_DRUZOR));
 
+            return games;
+        }
 
     }
 }
