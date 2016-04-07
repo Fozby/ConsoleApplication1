@@ -17,23 +17,38 @@ namespace ConsoleApplication1
         public Mongo()
         {
             theClient = new MongoClient("mongodb://localhost:27017");
-            theDataBase = theClient.GetDatabase("Riot");
-            gameCollection = theDataBase.GetCollection<Game>("Games");
-            matchCollection = theDataBase.GetCollection<MatchDetails>("Matches");
+            theDataBase = theClient.GetDatabase("Riot_1");
+            gameCollection = theDataBase.GetCollection<Game>("Game_1");
+            matchCollection = theDataBase.GetCollection<MatchDetails>("Match_1");
 
             handleIndexes();
         }
 
+        public void dropAll()
+        {
+            gameCollection.DeleteMany(FilterDefinition<Game>.Empty);
+        }
+
         private void handleIndexes()
         {
+           // gameCollection.Indexes.DropAll();
+            //matchCollection.Indexes.DropAll();
+
+            
             //Add gameId as a Unique Index (Primary Key)
             if (gameCollection.Indexes.List().ToList().Count == 0)
             {
+                Console.WriteLine("No indexes found, adding index");
                 CreateIndexOptions cio = new CreateIndexOptions();
                 cio.Unique = true;
-                gameCollection.Indexes.CreateOneAsync(Builders<Game>.IndexKeys.Ascending(_ => _.gameId), cio);
+
+                IndexKeysDefinition<Game> gameId = Builders<Game>.IndexKeys.Ascending(_ => _.gameId);
+                IndexKeysDefinition<Game> summonerId = Builders<Game>.IndexKeys.Ascending(_ => _.summonerId);
+
+                gameCollection.Indexes.CreateOneAsync(Builders<Game>.IndexKeys.Combine(gameId, summonerId), cio);
             }
 
+            /*
             //Add matchId as a Unique Index (Primary Key)
             if (matchCollection.Indexes.List().ToList().Count == 0)
             {
@@ -41,6 +56,7 @@ namespace ConsoleApplication1
                 cio.Unique = true;
                 matchCollection.Indexes.CreateOneAsync(Builders<MatchDetails>.IndexKeys.Ascending(_ => _.matchId), cio);
             }
+            */
         }
 
         public bool insertGame(Game game)

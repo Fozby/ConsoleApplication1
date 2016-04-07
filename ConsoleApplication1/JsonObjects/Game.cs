@@ -7,6 +7,7 @@ namespace ConsoleApplication1.JsonObjects
     {
         public ObjectId Id { get; set; }
 
+        public long summonerId { get; set; }
         public List<FellowPlayer> fellowPlayers { get; set; }
         public string gameType { get; set; }
         public Stats stats { get; set; }
@@ -22,5 +23,10 @@ namespace ConsoleApplication1.JsonObjects
         public int spell2 { get; set; }
         public string subType { get; set; }
         public int teamId { get; set; }
+
+        public string GetPK()
+        {
+            return $"Game Id [{gameId}]. Summoner Id [{summonerId}]";
+        }
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using ConsoleApplication1.JsonObjects;
-using ConsoleApplication1.GoogleNS;
 using MongoDB.Bson;
 using ConsoleApplication1.JsonObjects.MatchObjects;
+using Newtonsoft.Json;
+using ConsoleApplication1.GoogleNS;
 
 namespace ConsoleApplication1
 {
@@ -15,16 +16,8 @@ namespace ConsoleApplication1
             Riot riot = new Riot();
             Mongo mongo = new Mongo();
             GoogleAPI google = new GoogleAPI();
-
-            MatchDetails match = riot.getMatch(128177983);
-            Console.WriteLine($"Found match: [{ match.matchId}], [{match.Id}]");
-            mongo.addMatch(match);
-            MatchDetails insertedMatch = mongo.getMatch(match.matchId);
-            Console.WriteLine($"Inserted match with id:[{insertedMatch.Id}]");
-            Console.WriteLine($"Total matches in DB now:{mongo.getMatchCount()}");
-            Console.ReadLine();
-            return;
-
+            MatchConverter converter = new MatchConverter();
+        
             Console.WriteLine("Loading recent games...");
             List<Game> games = riot.getRecentGamesForAllPlayers();
 
@@ -33,28 +26,24 @@ namespace ConsoleApplication1
 
             Console.WriteLine("Starting 1 hour timer...");
 
-            foreach (Game g in games)
-            {
-                google.addGame(g);
-            }
+            List<Game> allGames = mongo.getAllGames();
 
-            /*
-            while (true)
+            foreach(Game game in allGames)
             {
-                Thread.Sleep(3600000);
-                Console.WriteLine("Adding recent games...");
-                mongo.insertGames(riot.getRecentGames());
+                GoogleRow row = MatchConverter.buildGoogleRow(game, riot.getTeamStatsForMatch(game.gameId, game.teamId));
+                //google.addGame(row);
+                //Console.WriteLine(JsonConvert.SerializeObject(row, Formatting.Indented));
             }
-            */
-
 
             while (true)
             {
+                Console.WriteLine("Insert command");
                 string input = Console.ReadLine();
 
                 if (input == "add")
                 {
                     mongo.insertGame(games[0]);
+                    Console.WriteLine("Inserted game: " + games[0].GetPK() + ", Count is now: " + mongo.getCount());
                 }
                 if (input == "addAll")
                 {
@@ -67,6 +56,17 @@ namespace ConsoleApplication1
                 if (input == "count")
                 {
                     Console.WriteLine("Count = " + mongo.getCount());
+                }
+                if (input == "drop")
+                {
+                    mongo.dropAll();
+                    Console.WriteLine("Count = " + mongo.getCount());
+                }
+                if (input == "google")
+                {
+                    Game g = mongo.getGame();
+                    GoogleRow row = MatchConverter.buildGoogleRow(g, riot.getTeamStatsForMatch(g.gameId, g.teamId));
+                    Console.WriteLine(JsonConvert.SerializeObject(row, Formatting.Indented));
                 }
             }
 

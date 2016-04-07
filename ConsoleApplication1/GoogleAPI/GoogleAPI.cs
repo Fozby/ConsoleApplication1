@@ -52,10 +52,10 @@ namespace ConsoleApplication1.GoogleNS
             });
         }
 
-        public void addGame(Game game)
+        public void addGame(GoogleRow row)
         {
             List<object> _params = new List<object>();
-            _params.Add(game);
+            _params.Add(row);
 
             // Create an execution request object.
             ExecutionRequest request = new ExecutionRequest();

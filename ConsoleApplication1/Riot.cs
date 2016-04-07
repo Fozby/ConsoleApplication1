@@ -1,5 +1,6 @@
 ﻿using ConsoleApplication1.JsonObjects;
 using ConsoleApplication1.JsonObjects.MatchObjects;
+using ConsoleApplication1.Objects;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -46,14 +47,20 @@ namespace ConsoleApplication1
             switch (statusCode)
             {
                 case RiotHttpStatusCode.OK: //200
+                {
+                    List<Game> games = response.Data.games;
+                    foreach (Game game in games)
                     {
-                        return response.Data.games;
+                        game.summonerId = summonerId;
                     }
+
+                    return games;
+                }
                 default:
-                    {
-                        Console.Error.WriteLine($"Response returned status: {statusCode}");
-                        break;
-                    }
+                {
+                    Console.Error.WriteLine($"Response returned status: {statusCode}");
+                    break;
+                }
             }
             return new List<Game>();
         }
@@ -68,6 +75,29 @@ namespace ConsoleApplication1
             games.AddRange(getRecentGames(SUMMONER_ID_DRUZOR));
 
             return games;
+        }
+
+
+        public TeamStats getTeamStatsForMatch(long matchId, int teamId)
+        {
+            TeamStats teamStats = new TeamStats();
+            MatchDetails match = getMatch(matchId);
+
+            foreach (Participant participant in match.participants)
+            {
+                if (participant.teamId == teamId)
+                {
+                    teamStats.kills += participant.stats.kills;
+                    teamStats.deaths += participant.stats.deaths;
+                    teamStats.assists += participant.stats.assists;
+                    teamStats.playerDmg += participant.stats.totalDamageDealtToChampions;
+                    teamStats.minionDmg += (participant.stats.totalDamageDealt - participant.stats.totalDamageDealtToChampions);
+                    teamStats.dmgTaken += participant.stats.totalDamageTaken;
+                    teamStats.gold += participant.stats.goldEarned;
+                    teamStats.minionKills += participant.stats.minionsKilled;
+                }
+            }
+            return teamStats;
         }
 
         public MatchDetails getMatch(long gameId)
