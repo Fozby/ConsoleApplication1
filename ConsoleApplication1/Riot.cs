@@ -15,7 +15,7 @@ namespace ConsoleApplication1
 {
     class Riot
     {
-        private const string API_KEY = "9b995c6c-7e5a-4c7a-b905-aab1928af045";
+        private const string API_KEY = "defcd602-52e5-4349-817c-2b3cd73e32b5"; //"9b995c6c-7e5a-4c7a-b905-aab1928af045";
         private const string REGION = "oce";
         private const long SUMMONER_ID_ETARAM = 356367;
         private const long SUMMONER_ID_PHYTHE = 557862;
@@ -23,10 +23,13 @@ namespace ConsoleApplication1
         private const long SUMMONER_ID_MIROTICA = 464473;
         private const long SUMMONER_ID_SCORILOUS = 470159;
         private const long SUMMONER_ID_DRUZOR = 485547;
+        private const long SUMMONER_ID_WART = 603309;
+        private const long SUMMONER_ID_NEWBULA = 2120419;
 
         private const string BASE_URI = "https://" + REGION + ".api.pvp.net/";
         private const string RECENT_GAMES_RESOURCE = "api/lol/" + REGION + "/v1.3/game/by-summoner/{0}/recent?api_key=" + API_KEY;
         private const string MATCH_RESOURCE = "api/lol/" + REGION + "/v2.2/match/{0}?api_key=" + API_KEY;
+        private const string CHAMPION_RESOURCE = "api/lol/static-data/" + REGION + "/v1.2/champion?api_key=" + API_KEY;
 
         private RestClient myRestClient = new RestClient(BASE_URI);
 
@@ -59,37 +62,20 @@ namespace ConsoleApplication1
             games.AddRange(getRecentGames(SUMMONER_ID_CELINAR));
             games.AddRange(getRecentGames(SUMMONER_ID_SCORILOUS));
             games.AddRange(getRecentGames(SUMMONER_ID_DRUZOR));
+            games.AddRange(getRecentGames(SUMMONER_ID_WART));
+            games.AddRange(getRecentGames(SUMMONER_ID_NEWBULA));
 
             return games;
-        }
-
-
-        public TeamStats getTeamStatsForMatch(long matchId, int teamId)
-        {
-            TeamStats teamStats = new TeamStats();
-            MatchDetails match = getMatch(matchId);
-
-            foreach (Participant participant in match.participants)
-            {
-                if (participant.teamId == teamId)
-                {
-                    teamStats.kills += participant.stats.kills;
-                    teamStats.deaths += participant.stats.deaths;
-                    teamStats.assists += participant.stats.assists;
-                    teamStats.playerDmg += participant.stats.totalDamageDealtToChampions;
-                    teamStats.minionDmg += (participant.stats.totalDamageDealt - participant.stats.totalDamageDealtToChampions);
-                    teamStats.dmgTaken += participant.stats.totalDamageTaken;
-                    teamStats.gold += participant.stats.goldEarned;
-                    teamStats.minionKills += participant.stats.minionsKilled;
-                }
-            }
-            return teamStats;
         }
 
         public MatchDetails getMatch(long gameId)
         {
             string resource = String.Format(MATCH_RESOURCE, gameId);
             return RiotApiRequest<MatchDetails>(resource);
+        }
+        public ChampionList getChampions()
+        {
+            return RiotApiRequest<ChampionList>(CHAMPION_RESOURCE);
         }
 
         private T RiotApiRequest<T>(string resource) where T : new()
