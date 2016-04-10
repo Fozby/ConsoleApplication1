@@ -32,7 +32,7 @@ namespace ConsoleApplication1
         private void handleIndexes()
         {
            // gameCollection.Indexes.DropAll();
-            //matchCollection.Indexes.DropAll();
+            matchCollection.Indexes.DropAll();
 
             
             //Add gameId as a Unique Index (Primary Key)
@@ -48,7 +48,7 @@ namespace ConsoleApplication1
                 gameCollection.Indexes.CreateOneAsync(Builders<Game>.IndexKeys.Combine(gameId, summonerId), cio);
             }
 
-            /*
+            
             //Add matchId as a Unique Index (Primary Key)
             if (matchCollection.Indexes.List().ToList().Count == 0)
             {
@@ -56,7 +56,7 @@ namespace ConsoleApplication1
                 cio.Unique = true;
                 matchCollection.Indexes.CreateOneAsync(Builders<MatchDetails>.IndexKeys.Ascending(_ => _.matchId), cio);
             }
-            */
+            
         }
 
         public bool insertGame(Game game)
@@ -109,6 +109,14 @@ namespace ConsoleApplication1
             return games;
         }
 
+        public List<Game> getARAMGames()
+        {
+            var sort = Builders<Game>.Sort.Ascending("gameId").Ascending("summonerId");
+
+            var games = gameCollection.Find(Builders<Game>.Filter.Eq("gameMode", "ARAM")).Sort(sort).ToList();
+            return games;
+        }
+
         public long getCount()
         {
             return gameCollection.Count(Builders<Game>.Filter.Empty);
@@ -137,8 +145,14 @@ namespace ConsoleApplication1
         public MatchDetails getMatch(long matchId)
         {
             var matches = matchCollection.Find(Builders<MatchDetails>.Filter.Eq("matchId", matchId)).ToList();
-            var match = matches.ElementAt(0);
-            return match;
+
+            if (matches.Count > 0)
+            {
+                var match = matches.ElementAt(0);
+                return match;
+            }
+
+            return null;
         }
 
         public long getMatchCount()

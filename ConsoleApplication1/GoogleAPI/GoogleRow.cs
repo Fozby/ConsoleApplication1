@@ -9,6 +9,7 @@ namespace ConsoleApplication1.GoogleNS
     class GoogleRow
     {
         public long gameId { get; set; }
+        public string matchDate { get; set; }
         public string player { get; set; }
         public string champion { get; set; }
         public bool win { get; set; }

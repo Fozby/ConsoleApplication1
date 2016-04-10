@@ -106,6 +106,8 @@
     <Compile Include="GoogleAPI\GoogleAPI.cs" />
     <Compile Include="GoogleAPI\GoogleRow.cs" />
     <Compile Include="GoogleAPI\MatchConverter.cs" />
+    <Compile Include="JsonObjects\ChampionDto.cs" />
+    <Compile Include="JsonObjects\ChampionList.cs" />
     <Compile Include="JsonObjects\MatchObjects\BannedChampion.cs" />
     <Compile Include="JsonObjects\MatchObjects\Event.cs" />
     <Compile Include="JsonObjects\MatchObjects\Frame.cs" />
