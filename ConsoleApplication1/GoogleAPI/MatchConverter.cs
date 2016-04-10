@@ -11,13 +11,36 @@ namespace ConsoleApplication1.GoogleNS
 {
     class MatchConverter
     {
-        public static GoogleRow buildGoogleRow(Game game, TeamStats teamStats)
+        static Dictionary<int, string> champions = new Dictionary<int, string>();
+        static Dictionary<long, string> players = new Dictionary<long, string>();
+
+        public MatchConverter()
         {
+            players.Add(356367, "Etaram");
+            players.Add(557862, "Phythe");
+            players.Add(692409, "Celinar");
+            players.Add(464473, "Mirotica");
+            players.Add(470159, "Scorilous");
+            players.Add(485547, "Druzor");
+            players.Add(603309, "Wart");
+            players.Add(2120419, "NewBula");
+        }
+
+        public GoogleRow buildGoogleRow(Game game, TeamStats teamStats)
+        {
+            string championName = game.championId.ToString();
+            champions.TryGetValue(game.championId, out championName);
+
+            string playerName = game.summonerId.ToString();
+            players.TryGetValue(game.summonerId, out playerName);
+
             GoogleRow row = new GoogleRow();
 
             row.gameId = game.gameId;
-            row.player = game.summonerId.ToString();
-            row.champion = game.championId.ToString();
+            DateTime dt = FromUnixTime(game.createDate);
+            row.matchDate = dt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+            row.player = playerName;
+            row.champion = championName;
             row.win = game.stats.win;
             row.kills = game.stats.championsKilled;
             row.deaths = game.stats.numDeaths;
@@ -90,7 +113,23 @@ namespace ConsoleApplication1.GoogleNS
             }
 
             return rows;
-        } 
+        }
+
+        public void loadChampions(ChampionList championList)
+        {
+            foreach (KeyValuePair<string, ChampionDto> entry in championList.data)
+            {
+                string championName = entry.Value.name;
+                int championId = entry.Value.id;
+                champions.Add(championId, championName);
+            }
+        }
+
+        public DateTime FromUnixTime(long unixTime)
+        {
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return epoch.AddMilliseconds(unixTime);
+        }
 
     }
 }
