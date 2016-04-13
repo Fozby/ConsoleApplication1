@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleApplication1.GoogleNS
 {
-    class GoogleRow
+    public class GameRow
     {
         public long gameId { get; set; }
         public string matchDate { get; set; }

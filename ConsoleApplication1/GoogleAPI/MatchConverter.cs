@@ -24,9 +24,12 @@ namespace ConsoleApplication1.GoogleNS
             players.Add(485547, "Druzor");
             players.Add(603309, "Wart");
             players.Add(2120419, "NewBula");
+            players.Add(601322, "Macabros9");
+            players.Add(891580, "Rishvas");
+            players.Add(6160582, "Rishmau");
         }
 
-        public GoogleRow buildGoogleRow(Game game, TeamStats teamStats)
+        public GameRow buildGoogleRow(Game game, TeamStats teamStats)
         {
             string championName = game.championId.ToString();
             champions.TryGetValue(game.championId, out championName);
@@ -34,7 +37,7 @@ namespace ConsoleApplication1.GoogleNS
             string playerName = game.summonerId.ToString();
             players.TryGetValue(game.summonerId, out playerName);
 
-            GoogleRow row = new GoogleRow();
+            GameRow row = new GameRow();
 
             row.gameId = game.gameId;
             DateTime dt = FromUnixTime(game.createDate);
@@ -58,9 +61,9 @@ namespace ConsoleApplication1.GoogleNS
             return row;
         }
 
-        public Dictionary<string, GoogleRow> convert(MatchDetails match)
+        public Dictionary<string, GameRow> convert(MatchDetails match)
         {
-            Dictionary<string, GoogleRow> rows = new Dictionary<string, GoogleRow>();
+            Dictionary<string, GameRow> rows = new Dictionary<string, GameRow>();
 
             long teamKills = 0;
             long teamDeaths = 0;
@@ -91,7 +94,7 @@ namespace ConsoleApplication1.GoogleNS
                 string player;
                 map.TryGetValue(participant.participantId, out player);
 
-                GoogleRow row = new GoogleRow();
+                GameRow row = new GameRow();
                 row.gameId = match.matchId;
                 row.player = player;
                 row.champion = participant.championId.ToString();

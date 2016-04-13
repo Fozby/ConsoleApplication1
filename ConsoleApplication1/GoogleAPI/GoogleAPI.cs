@@ -1,4 +1,5 @@
 ﻿using ConsoleApplication1.JsonObjects;
+using ConsoleApplication1.Objects;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Script.v1;
 using Google.Apis.Script.v1.Data;
@@ -49,14 +50,27 @@ namespace ConsoleApplication1.GoogleNS
             });
         }
 
-        public void addGame(GoogleRow row)
+        public void addGame(GameRow row)
         {
             List<object> _params = new List<object>();
             _params.Add(row);
 
+            callMethod("addGame", _params);
+        }
+
+        public void addPlayerStats(PlayerStats stats)
+        {
+            List<object> _params = new List<object>();
+            _params.Add(stats);
+
+            callMethod("addPlayerStats", _params);
+        }
+
+        private void callMethod(string method, List<Object> _params)
+        {
             // Create an execution request object.
             ExecutionRequest request = new ExecutionRequest();
-            request.Function = "addGame";
+            request.Function = method;
             request.Parameters = _params;
 
             ScriptsResource.RunRequest runReq =
@@ -116,6 +130,6 @@ namespace ConsoleApplication1.GoogleNS
                 // started executing.
                 Console.WriteLine("Error calling API:\n{0}", e);
             }
-        }
+        } 
     }
 }

@@ -33,19 +33,6 @@ namespace ConsoleApplication1
                 Console.WriteLine("Insert command");
                 string input = Console.ReadLine();
 
-                if (input == "add")
-                {
-                    mongo.insertGame(games[0]);
-                    Console.WriteLine("Inserted game: " + games[0].GetPK() + ", Count is now: " + mongo.getCount());
-                }
-                if (input == "addAll")
-                {
-                    mongo.insertGames(games);
-                }
-                if (input == "get")
-                {
-                    Console.WriteLine(mongo.getGame().ToJson());
-                }
                 if (input == "getMatch")
                 {
                     mongo.getMatch(123);
@@ -66,16 +53,47 @@ namespace ConsoleApplication1
                     foreach (Game game in allGames)
                     {
                         uploadGame(game);
-                        Thread.Sleep(1100);
                     }
                 }
+                if (input == "stats")
+                {
+                    addAllPlayerStats();
+                }
+            }  
+        }
+
+        private static void addAllPlayerStats()
+        {
+            List<long> summoners = riot.getAllSummoners();
+
+            foreach (long summonerId in summoners)
+            {
+                List<Game> statGames = mongo.getARAMGamesForPlayer(summonerId);
+                PlayerStats stats = new PlayerStats(getGameRows(statGames));
+                google.addPlayerStats(stats);
+            }
+        }
+
+        private static List<GameRow> getGameRows(List<Game> games)
+        {
+            List<GameRow> gameRows = new List<GameRow>();
+
+            foreach(Game game in games)
+            {
+                gameRows.Add(getGameRow(game));
             }
 
+            return gameRows;
         }
 
         private static void uploadGame(Game game)
         {
-            Console.WriteLine($"Uploading game {game.gameId} for player {game.summonerId}");
+            GameRow row = getGameRow(game);
+            google.addGame(row);
+        }
+
+        private static GameRow getGameRow(Game game)
+        {
             long matchId = game.gameId;
             int teamId = game.teamId;
 
@@ -83,18 +101,11 @@ namespace ConsoleApplication1
 
             if (match == null)
             {
-                Console.WriteLine($"Match Data was not found");
                 match = riot.getMatch(matchId);
                 mongo.addMatch(match);
-                Console.WriteLine($"Queried and stored match {match.matchId}");
-            }
-            else
-            {
-                Console.WriteLine($"Match Data was found");
             }
 
-            GoogleRow row = converter.buildGoogleRow(game, getTeamStatsForMatch(match, teamId));
-            google.addGame(row);
+            return converter.buildGoogleRow(game, getTeamStatsForMatch(match, teamId));
         }
 
         private static TeamStats getTeamStatsForMatch(MatchDetails match, int teamId)

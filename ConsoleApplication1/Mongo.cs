@@ -22,6 +22,11 @@ namespace ConsoleApplication1
             matchCollection = theDataBase.GetCollection<MatchDetails>("Match_1");
 
             handleIndexes();
+
+            var builder = Builders<Game>.Filter;
+            var filter = builder.Eq("gameId", 128729361) & builder.Eq("summonerId", Riot.SUMMONER_ID_DRUZOR);
+
+            gameCollection.DeleteOne(filter);
         }
 
         public void dropAll()
@@ -114,6 +119,17 @@ namespace ConsoleApplication1
             var sort = Builders<Game>.Sort.Ascending("gameId").Ascending("summonerId");
 
             var games = gameCollection.Find(Builders<Game>.Filter.Eq("gameMode", "ARAM")).Sort(sort).ToList();
+            return games;
+        }
+
+        public List<Game> getARAMGamesForPlayer(long summonerId)
+        {
+            var builder = Builders<Game>.Filter;
+            var filter = builder.Eq("summonerId", summonerId) &
+                         builder.Eq("gameMode", "ARAM");
+
+            var games = gameCollection.Find(filter).ToList();
+
             return games;
         }
 

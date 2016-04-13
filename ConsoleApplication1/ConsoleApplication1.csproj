@@ -104,7 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GoogleAPI\GoogleAPI.cs" />
-    <Compile Include="GoogleAPI\GoogleRow.cs" />
+    <Compile Include="GoogleAPI\GameRow.cs" />
     <Compile Include="GoogleAPI\MatchConverter.cs" />
     <Compile Include="JsonObjects\ChampionDto.cs" />
     <Compile Include="JsonObjects\ChampionList.cs" />
@@ -124,6 +124,7 @@
     <Compile Include="JsonObjects\MatchObjects\ParticipantIdentity .cs" />
     <Compile Include="JsonObjects\MatchObjects\Timeline.cs" />
     <Compile Include="JsonObjects\ParticipantTimelineData.cs" />
+    <Compile Include="Objects\PlayerStats.cs" />
     <Compile Include="Objects\TeamStats.cs" />
     <Compile Include="Riot.cs" />
     <Compile Include="JsonObjects\FellowPlayer.cs" />

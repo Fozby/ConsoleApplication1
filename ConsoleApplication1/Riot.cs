@@ -15,21 +15,45 @@ namespace ConsoleApplication1
 {
     class Riot
     {
-        private const string API_KEY = "defcd602-52e5-4349-817c-2b3cd73e32b5"; //"9b995c6c-7e5a-4c7a-b905-aab1928af045";
+        private const string API_KEY = "defcd602-52e5-4349-817c-2b3cd73e32b5"; 
+        //private const string API_KEY = "9b995c6c-7e5a-4c7a-b905-aab1928af045"; 
+
         private const string REGION = "oce";
-        private const long SUMMONER_ID_ETARAM = 356367;
-        private const long SUMMONER_ID_PHYTHE = 557862;
-        private const long SUMMONER_ID_CELINAR = 692409;
-        private const long SUMMONER_ID_MIROTICA = 464473;
-        private const long SUMMONER_ID_SCORILOUS = 470159;
-        private const long SUMMONER_ID_DRUZOR = 485547;
-        private const long SUMMONER_ID_WART = 603309;
-        private const long SUMMONER_ID_NEWBULA = 2120419;
+        public const long SUMMONER_ID_ETARAM = 356367;
+        public const long SUMMONER_ID_PHYTHE = 557862;
+        public const long SUMMONER_ID_CELINAR = 692409;
+        public const long SUMMONER_ID_MIROTICA = 464473;
+        public const long SUMMONER_ID_SCORILOUS = 470159;
+        public const long SUMMONER_ID_DRUZOR = 485547;
+        public const long SUMMONER_ID_WART = 603309;
+        public const long SUMMONER_ID_NEWBULA = 2120419;
+        public const long SUMMONER_ID_MACABROS9 = 601322;
+        public const long SUMMONER_ID_RISHVAS = 891580;
+        public const long SUMMONER_ID_RISHMAU = 6160582;
+
 
         private const string BASE_URI = "https://" + REGION + ".api.pvp.net/";
         private const string RECENT_GAMES_RESOURCE = "api/lol/" + REGION + "/v1.3/game/by-summoner/{0}/recent?api_key=" + API_KEY;
         private const string MATCH_RESOURCE = "api/lol/" + REGION + "/v2.2/match/{0}?api_key=" + API_KEY;
         private const string CHAMPION_RESOURCE = "api/lol/static-data/" + REGION + "/v1.2/champion?api_key=" + API_KEY;
+
+        public List<long> getAllSummoners()
+        {
+            List<long> summoners = new List<long>();
+            summoners.Add(SUMMONER_ID_ETARAM);
+            summoners.Add(SUMMONER_ID_PHYTHE);
+            summoners.Add(SUMMONER_ID_CELINAR);
+            summoners.Add(SUMMONER_ID_MIROTICA);
+            summoners.Add(SUMMONER_ID_SCORILOUS);
+            summoners.Add(SUMMONER_ID_DRUZOR);
+            summoners.Add(SUMMONER_ID_WART);
+            summoners.Add(SUMMONER_ID_NEWBULA);
+            summoners.Add(SUMMONER_ID_MACABROS9);
+            summoners.Add(SUMMONER_ID_RISHVAS);
+            summoners.Add(SUMMONER_ID_RISHMAU);
+
+            return summoners;
+        }
 
         private RestClient myRestClient = new RestClient(BASE_URI);
 
@@ -56,14 +80,12 @@ namespace ConsoleApplication1
 
         public List<Game> getRecentGamesForAllPlayers()
         {
-            List<Game> games = getRecentGames(SUMMONER_ID_ETARAM);
-            games.AddRange(getRecentGames(SUMMONER_ID_PHYTHE));
-            games.AddRange(getRecentGames(SUMMONER_ID_MIROTICA));
-            games.AddRange(getRecentGames(SUMMONER_ID_CELINAR));
-            games.AddRange(getRecentGames(SUMMONER_ID_SCORILOUS));
-            games.AddRange(getRecentGames(SUMMONER_ID_DRUZOR));
-            games.AddRange(getRecentGames(SUMMONER_ID_WART));
-            games.AddRange(getRecentGames(SUMMONER_ID_NEWBULA));
+            List<Game> games = new List<Game>();
+
+            foreach (long summonerId in getAllSummoners())
+            {
+                games.AddRange(getRecentGames(summonerId));
+            }
 
             return games;
         }
@@ -80,6 +102,8 @@ namespace ConsoleApplication1
 
         private T RiotApiRequest<T>(string resource) where T : new()
         {
+            Thread.Sleep(1100);
+
             RestRequest request = new RestRequest(resource, Method.GET);
             IRestResponse<T> response = myRestClient.Execute<T>(request);
 
