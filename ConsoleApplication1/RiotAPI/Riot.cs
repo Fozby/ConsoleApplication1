@@ -1,4 +1,5 @@
 ﻿using ConsoleApplication1.JsonObjects;
+using ConsoleApplication1.JsonObjects.FeaturedGames;
 using ConsoleApplication1.JsonObjects.MatchObjects;
 using ConsoleApplication1.Objects;
 using RestSharp;
@@ -19,48 +20,26 @@ namespace ConsoleApplication1
         //private const string API_KEY = "9b995c6c-7e5a-4c7a-b905-aab1928af045"; 
 
         private const string REGION = "oce";
-        public const long SUMMONER_ID_ETARAM = 356367;
-        public const long SUMMONER_ID_PHYTHE = 557862;
-        public const long SUMMONER_ID_CELINAR = 692409;
-        public const long SUMMONER_ID_MIROTICA = 464473;
-        public const long SUMMONER_ID_SCORILOUS = 470159;
-        public const long SUMMONER_ID_DRUZOR = 485547;
-        public const long SUMMONER_ID_WART = 603309;
-        public const long SUMMONER_ID_NEWBULA = 2120419;
-        public const long SUMMONER_ID_MACABROS9 = 601322;
-        public const long SUMMONER_ID_RISHVAS = 891580;
-        public const long SUMMONER_ID_RISHMAU = 6160582;
-
 
         private const string BASE_URI = "https://" + REGION + ".api.pvp.net/";
         private const string RECENT_GAMES_RESOURCE = "api/lol/" + REGION + "/v1.3/game/by-summoner/{0}/recent?api_key=" + API_KEY;
         private const string MATCH_RESOURCE = "api/lol/" + REGION + "/v2.2/match/{0}?api_key=" + API_KEY;
         private const string CHAMPION_RESOURCE = "api/lol/static-data/" + REGION + "/v1.2/champion?api_key=" + API_KEY;
+        private const string FEATURED_GAMES_RESOURCE = "observer-mode/rest/featured?api_key=" + API_KEY;
 
-        public List<long> getAllSummoners()
-        {
-            List<long> summoners = new List<long>();
-            summoners.Add(SUMMONER_ID_ETARAM);
-            summoners.Add(SUMMONER_ID_PHYTHE);
-            summoners.Add(SUMMONER_ID_CELINAR);
-            summoners.Add(SUMMONER_ID_MIROTICA);
-            summoners.Add(SUMMONER_ID_SCORILOUS);
-            summoners.Add(SUMMONER_ID_DRUZOR);
-            summoners.Add(SUMMONER_ID_WART);
-            summoners.Add(SUMMONER_ID_NEWBULA);
-            summoners.Add(SUMMONER_ID_MACABROS9);
-            summoners.Add(SUMMONER_ID_RISHVAS);
-            summoners.Add(SUMMONER_ID_RISHMAU);
 
-            return summoners;
-        }
 
         private RestClient myRestClient = new RestClient(BASE_URI);
 
-        public List<Game> getRecentGames()
+        public List<FeaturedGame> getFeaturedGames()
         {
-            //default summonerid
-            return getRecentGames(SUMMONER_ID_ETARAM);
+            FeaturedGamesResponse response = RiotApiRequest<FeaturedGamesResponse>(FEATURED_GAMES_RESOURCE);
+
+            List<FeaturedGame> games = response.gameList;
+
+            List<FeaturedGame> aramGames = games.FindAll(g => g.gameMode == "ARAM");
+
+            return aramGames;
         }
 
         public List<Game> getRecentGames(long summonerId)
@@ -82,7 +61,7 @@ namespace ConsoleApplication1
         {
             List<Game> games = new List<Game>();
 
-            foreach (long summonerId in getAllSummoners())
+            foreach (long summonerId in Global.Summoners)
             {
                 games.AddRange(getRecentGames(summonerId));
             }

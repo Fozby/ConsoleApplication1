@@ -1,4 +1,4 @@
-﻿using ConsoleApplication1.JsonObjects;
+﻿using ConsoleApplication1.GoogleNS.Entities;
 using ConsoleApplication1.Objects;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Script.v1;
@@ -64,6 +64,14 @@ namespace ConsoleApplication1.GoogleNS
             _params.Add(stats);
 
             callMethod("addPlayerStats", _params);
+        }
+
+        public void addChampionStats(ChampionStats stats)
+        {
+            List<object> _params = new List<object>();
+            _params.Add(stats);
+
+            callMethod("addFeaturedStats", _params);
         }
 
         private void callMethod(string method, List<Object> _params)

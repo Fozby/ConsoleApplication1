@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using ConsoleApplication1.JsonObjects;
-using MongoDB.Bson;
 using ConsoleApplication1.JsonObjects.MatchObjects;
 using Newtonsoft.Json;
 using ConsoleApplication1.GoogleNS;
 using ConsoleApplication1.Objects;
 using System.Threading;
+using ConsoleApplication1.JsonObjects.FeaturedGames;
+using ConsoleApplication1.GoogleNS.Entities;
 
 namespace ConsoleApplication1
 {
@@ -18,10 +19,10 @@ namespace ConsoleApplication1
         static MatchConverter converter = new MatchConverter();
 
         static void Main(string[] args)
-        {
+        { 
             Console.WriteLine("Starting...");
-            converter.loadChampions(riot.getChampions());
-                    
+            Global.loadChampions(riot.getChampions());
+
             Console.WriteLine("Loading recent games...");
             List<Game> games = riot.getRecentGamesForAllPlayers();
 
@@ -33,20 +34,21 @@ namespace ConsoleApplication1
                 Console.WriteLine("Insert command");
                 string input = Console.ReadLine();
 
-                if (input == "getMatch")
+                if (input == "feat")
                 {
-                    mongo.getMatch(123);
+                    Console.WriteLine("Starting 5 minute timer to query featured games...");
+                    while (true)
+                    {
+                        List<FeaturedGame> featuredAram = riot.getFeaturedGames();
+                        if (featuredAram != null && featuredAram.Count > 0)
+                        {
+                            mongo.insertFeaturedGames(featuredAram);
+                        }
+                        Console.WriteLine($"Total featured games: {mongo.getFeaturedGameCount()}");
+                        Thread.Sleep(300000);
+                    }
                 }
-                if (input == "count")
-                {
-                    Console.WriteLine("Count = " + mongo.getCount());
-                }
-                if (input == "drop")
-                {
-                    mongo.dropAll();
-                    Console.WriteLine("Count = " + mongo.getCount());
-                }
-                if (input == "upload")
+                else if (input == "upload")
                 {
                     List<Game> allGames = mongo.getARAMGames();
 
@@ -55,18 +57,51 @@ namespace ConsoleApplication1
                         uploadGame(game);
                     }
                 }
-                if (input == "stats")
+                else if (input == "stats")
                 {
                     addAllPlayerStats();
                 }
-            }  
+                else if (input == "featured")
+                {
+                    mongo.getFeaturedPlayers().ForEach(Console.WriteLine);
+                }
+                else if (input == "foo")
+                {
+                    foo();
+                }
+                else
+                {
+                    Game g = mongo.getGame(long.Parse(input));
+                    Console.WriteLine(JsonConvert.SerializeObject(g, Formatting.Indented));
+                }
+            }
+        }
+
+        private static void foo()
+        {
+            for (int championId = 0; championId < 150; championId++)
+            {
+                Console.WriteLine($"Building featured champion statistics for champion: {championId}");
+                List<MatchDetails> matches = getStatsForChampion(championId);
+
+                if (matches.Count > 0)
+                {
+                    Console.WriteLine($"{matches.Count} found for champion {championId} aka {Global.getChampionName(championId)}");
+                    ChampionStats stats = new ChampionStats(championId, matches);
+                    google.addChampionStats(stats);
+                }
+                else
+                {
+                    Console.WriteLine($"No matches found for {championId} aka {Global.getChampionName(championId)}");
+                }
+            }
+
+            throw new NotImplementedException();
         }
 
         private static void addAllPlayerStats()
         {
-            List<long> summoners = riot.getAllSummoners();
-
-            foreach (long summonerId in summoners)
+            foreach (long summonerId in Global.Summoners)
             {
                 List<Game> statGames = mongo.getARAMGamesForPlayer(summonerId);
                 PlayerStats stats = new PlayerStats(getGameRows(statGames));
@@ -78,9 +113,16 @@ namespace ConsoleApplication1
         {
             List<GameRow> gameRows = new List<GameRow>();
 
-            foreach(Game game in games)
+            foreach (Game game in games)
             {
-                gameRows.Add(getGameRow(game));
+                try
+                {
+                    gameRows.Add(getGameRow(game));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error getting gamerow for game: " + game.gameId + "player: " + game.summonerId);
+                }
             }
 
             return gameRows;
@@ -108,7 +150,8 @@ namespace ConsoleApplication1
             return converter.buildGoogleRow(game, getTeamStatsForMatch(match, teamId));
         }
 
-        private static TeamStats getTeamStatsForMatch(MatchDetails match, int teamId)
+        //TODO move to instance method on MatchDetails
+        public static TeamStats getTeamStatsForMatch(MatchDetails match, int teamId)
         {
             TeamStats teamStats = new TeamStats();
 
@@ -127,6 +170,40 @@ namespace ConsoleApplication1
                 }
             }
             return teamStats;
+        }
+
+        private static List<MatchDetails> getStatsForChampion(int championId)
+        {
+            Console.WriteLine($"Finding games and matches with champion: {championId}");
+            List<FeaturedGame> games = mongo.getFeaturedGamesForChampion(championId);
+
+            List<MatchDetails> matchesWithChampion = new List<MatchDetails>();
+            foreach (FeaturedGame game in games)
+            {
+                MatchDetails match = mongo.getMatch(game.gameId);
+
+                if (match == null)
+                {
+                    Console.WriteLine($"Match not found in DB, querying Riot for match: {game.gameId}");
+                    match = riot.getMatch(game.gameId);
+
+                    if (match != null)
+                    {
+                        mongo.addMatch(match);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Riot failed to find match {game.gameId}");
+                    }
+                }
+
+                if (match != null)
+                {
+                    matchesWithChampion.Add(match);
+                }
+            }
+
+            return matchesWithChampion;
         }
     }
 }

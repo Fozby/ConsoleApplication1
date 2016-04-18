@@ -66,11 +66,6 @@ namespace ConsoleApplication1.Objects
                 totalPlayerDmgPct += game.playerDmgAsPct;
                 totalDmgTakenPct += game.dmgTakenAsPct;
                 totalGoldPct += game.goldEarnedAsPct;
-
-                if (totalKillParticipation == null)
-                {
-                    int i = 3;
-                }
             }
 
             win = totalWin / numGames;

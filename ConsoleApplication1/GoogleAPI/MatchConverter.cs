@@ -11,7 +11,6 @@ namespace ConsoleApplication1.GoogleNS
 {
     class MatchConverter
     {
-        static Dictionary<int, string> champions = new Dictionary<int, string>();
         static Dictionary<long, string> players = new Dictionary<long, string>();
 
         public MatchConverter()
@@ -32,7 +31,6 @@ namespace ConsoleApplication1.GoogleNS
         public GameRow buildGoogleRow(Game game, TeamStats teamStats)
         {
             string championName = game.championId.ToString();
-            champions.TryGetValue(game.championId, out championName);
 
             string playerName = game.summonerId.ToString();
             players.TryGetValue(game.summonerId, out playerName);
@@ -118,15 +116,6 @@ namespace ConsoleApplication1.GoogleNS
             return rows;
         }
 
-        public void loadChampions(ChampionList championList)
-        {
-            foreach (KeyValuePair<string, ChampionDto> entry in championList.data)
-            {
-                string championName = entry.Value.name;
-                int championId = entry.Value.id;
-                champions.Add(championId, championName);
-            }
-        }
 
         public DateTime FromUnixTime(long unixTime)
         {
