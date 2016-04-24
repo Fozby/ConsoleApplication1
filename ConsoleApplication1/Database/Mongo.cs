@@ -27,11 +27,6 @@ namespace ConsoleApplication1.Database
             handleIndexes();
         }
 
-        public void dropAll()
-        {
-            gameCollection.DeleteMany(FilterDefinition<Game>.Empty);
-        }
-
         private void handleIndexes()
         {
             //Add gameId as a Unique Index (Primary Key)
@@ -86,7 +81,7 @@ namespace ConsoleApplication1.Database
             return false;
         }
 
-        public void insertGames(List<Game> games)
+        public int insertGames(List<Game> games)
         {
             int numAdded = 0;
             foreach(Game game in games)
@@ -97,7 +92,7 @@ namespace ConsoleApplication1.Database
                 }
             }
 
-            Console.WriteLine("Added " + numAdded + " / " + games.Count + " games");
+            return numAdded;
         }
 
         public Game getGame(long gameId)
@@ -157,7 +152,7 @@ namespace ConsoleApplication1.Database
             return gameCollection.Count(Builders<Game>.Filter.Empty);
         }
 
-        public void addMatch(MatchDetails match)
+        public void insertMatch(MatchDetails match)
         {
             try
             {

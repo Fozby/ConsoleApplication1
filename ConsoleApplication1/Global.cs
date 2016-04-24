@@ -20,24 +20,22 @@ namespace ConsoleApplication1
         public const long SUMMONER_ID_IGAR = 577854;
 
         public static Dictionary<int, string> champions = new Dictionary<int, string>();
-
-        public static readonly List<long> Summoners = new List<long>
-        (
-            new List<long>
-            {
-             SUMMONER_ID_ETARAM,
-             SUMMONER_ID_PHYTHE,
-             SUMMONER_ID_CELINAR,
-             SUMMONER_ID_MIROTICA,
-             SUMMONER_ID_SCORILOUS,
-             SUMMONER_ID_DRUZOR,
-             SUMMONER_ID_WART,
-             SUMMONER_ID_NEWBULA,
-             SUMMONER_ID_MACABROS9,
-             SUMMONER_ID_RISHMAU,
-             SUMMONER_ID_IGAR
-            }
-        );
+  
+        public static readonly Dictionary<long, string> players = new Dictionary<long, string>
+        { 
+            {SUMMONER_ID_ETARAM, "Etaram" },
+            {SUMMONER_ID_PHYTHE, "Phythe" },
+            {SUMMONER_ID_CELINAR, "Celinar" },
+            {SUMMONER_ID_MIROTICA, "Mirotica" },
+            {SUMMONER_ID_SCORILOUS, "Scorilous" },
+            {SUMMONER_ID_DRUZOR, "Druzor" },
+            {SUMMONER_ID_WART, "Wart" },
+            {SUMMONER_ID_NEWBULA, "NewBula" },
+            {SUMMONER_ID_MACABROS9, "Macabros9" },
+            {SUMMONER_ID_RISHMAU, "Rishmau" },
+            {SUMMONER_ID_RISHVAS, "Rishvas" },
+            {SUMMONER_ID_IGAR, "Igar" }
+        };
 
         public static void loadChampions(ChampionList championList)
         {

@@ -61,7 +61,7 @@ namespace ConsoleApplication1.RiotAPI
         {
             List<Game> games = new List<Game>();
 
-            foreach (long summonerId in Global.Summoners)
+            foreach (long summonerId in Global.players.Keys)
             {
                 games.AddRange(getRecentGames(summonerId));
             }
