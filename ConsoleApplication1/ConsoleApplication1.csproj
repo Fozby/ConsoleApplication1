@@ -104,7 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Global.cs" />
-    <Compile Include="GoogleAPI\Entities\CompetitiveChampionStats.cs" />
+    <Compile Include="GoogleAPI\Entities\ComparativeChampionStats.cs" />
     <Compile Include="GoogleAPI\Entities\ChampionStats.cs" />
     <Compile Include="GoogleAPI\GoogleSheets.cs" />
     <Compile Include="GoogleAPI\Entities\GameStats.cs" />

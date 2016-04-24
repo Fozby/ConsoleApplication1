@@ -7,6 +7,7 @@ using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
 using ConsoleApplication1.RiotAPI.Entities.RecentGames;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace ConsoleApplication1
@@ -111,13 +112,17 @@ namespace ConsoleApplication1
 
         public void UploadCompetitiveChampionStats()
         {
+            List<ComparativeChampionStats> statsList = new List<ComparativeChampionStats>();
+
             foreach (int championId in Global.champions.Keys)
             {
                 List<MatchDetails> matches = GetMatchesWithChampion(championId);
+
                 if (matches.Count > 0)
                 {
                     Dictionary<long, List<GameStats>> playerStats = new Dictionary<long, List<GameStats>>(); //<SummonerID, [List of Recent Games]
 
+                    long totalFriendGames = 0;
                     foreach (int summonerId in Global.players.Keys)
                     {
                         List<RecentGame> recentGames = mongo.GetRecentGamesForChampionAndSummoner(championId, summonerId);
@@ -126,12 +131,23 @@ namespace ConsoleApplication1
                         {
                             playerStats.Add(summonerId, BuildGameStats(recentGames));
                         }
+
+                        totalFriendGames += recentGames.Count;
                     }
 
-                    CompetitiveChampionStats stats = converter.BuildCompetitiveChampionStats(championId, matches, playerStats);
-                    google.AddCompetitiveChampionStats(stats);
+                    ComparativeChampionStats stats = converter.BuildCompetitiveChampionStats(championId, matches, playerStats);
+
+                    statsList.Add(stats);
                 }
             }
+
+            statsList = statsList.OrderByDescending(c => c.getNumFriendlyGames()).ToList();
+
+            foreach (ComparativeChampionStats stats in statsList)
+            {
+                google.AddCompetitiveChampionStats(stats);
+            }
+
         }
 
         private List<MatchDetails> GetMatchesWithChampion(int championId)

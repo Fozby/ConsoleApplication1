@@ -73,7 +73,7 @@ namespace ConsoleApplication1.GoogleAPI
             callMethod("addFeaturedStats", _params);
         }
 
-        public void AddCompetitiveChampionStats(CompetitiveChampionStats stats)
+        public void AddCompetitiveChampionStats(ComparativeChampionStats stats)
         {
             List<object> _params = new List<object>();
             _params.Add(stats);

@@ -9,9 +9,9 @@ namespace ConsoleApplication1.GoogleAPI
 {
     class MatchConverter
     {
-        public CompetitiveChampionStats BuildCompetitiveChampionStats(int championId, List<MatchDetails> matches, Dictionary<long, List<GameStats>> playerGames)
+        public ComparativeChampionStats BuildCompetitiveChampionStats(int championId, List<MatchDetails> matches, Dictionary<long, List<GameStats>> playerGames)
         {
-            CompetitiveChampionStats stats = new CompetitiveChampionStats();
+            ComparativeChampionStats stats = new ComparativeChampionStats();
 
             stats.championStats = BuildChampionStats(championId, matches);
             
