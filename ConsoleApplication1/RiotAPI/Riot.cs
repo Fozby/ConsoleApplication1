@@ -35,11 +35,18 @@ namespace ConsoleApplication1
         {
             FeaturedGamesResponse response = RiotApiRequest<FeaturedGamesResponse>(FEATURED_GAMES_RESOURCE);
 
-            List<FeaturedGame> games = response.gameList;
+            if (response != null && response.gameList != null)
+            {
+                List<FeaturedGame> games = response.gameList;
 
-            List<FeaturedGame> aramGames = games.FindAll(g => g.gameMode == "ARAM");
+                List<FeaturedGame> aramGames = games.FindAll(g => g.gameMode == "ARAM");
 
-            return aramGames;
+                return aramGames;
+            }
+            else
+            {
+                return new List<FeaturedGame>();
+            }
         }
 
         public List<Game> getRecentGames(long summonerId)

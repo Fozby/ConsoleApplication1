@@ -19,7 +19,7 @@ namespace ConsoleApplication1
         static MatchConverter converter = new MatchConverter();
 
         static void Main(string[] args)
-        { 
+        {
             Console.WriteLine("Starting...");
             Global.loadChampions(riot.getChampions());
 
@@ -79,7 +79,9 @@ namespace ConsoleApplication1
 
         private static void foo()
         {
-            for (int championId = 0; championId < 150; championId++)
+            
+
+            foreach (int championId in Global.champions.Keys)
             {
                 Console.WriteLine($"Building featured champion statistics for champion: {championId}");
                 List<MatchDetails> matches = getStatsForChampion(championId);
@@ -175,10 +177,37 @@ namespace ConsoleApplication1
         private static List<MatchDetails> getStatsForChampion(int championId)
         {
             Console.WriteLine($"Finding games and matches with champion: {championId}");
-            List<FeaturedGame> games = mongo.getFeaturedGamesForChampion(championId);
-
             List<MatchDetails> matchesWithChampion = new List<MatchDetails>();
-            foreach (FeaturedGame game in games)
+
+            List<FeaturedGame> featuredGames = mongo.getFeaturedGamesForChampion(championId);
+            foreach (FeaturedGame featuredGame in featuredGames)
+            {
+                MatchDetails match = mongo.getMatch(featuredGame.gameId);
+
+                if (match == null)
+                {
+                    Console.WriteLine($"Match not found in DB, querying Riot for match: {featuredGame.gameId}");
+                    match = riot.getMatch(featuredGame.gameId);
+
+                    if (match != null)
+                    {
+                        mongo.addMatch(match);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Riot failed to find match {featuredGame.gameId}");
+                    }
+                }
+
+                if (match != null && !matchesWithChampion.Contains(match))
+                {
+                    matchesWithChampion.Add(match);
+                }
+            }
+
+            List<Game> games = mongo.getGamesForChampion(championId);
+
+            foreach(Game game in games)
             {
                 MatchDetails match = mongo.getMatch(game.gameId);
 
@@ -197,10 +226,11 @@ namespace ConsoleApplication1
                     }
                 }
 
-                if (match != null)
+                if (match != null && !matchesWithChampion.Contains(match))
                 {
                     matchesWithChampion.Add(match);
                 }
+
             }
 
             return matchesWithChampion;

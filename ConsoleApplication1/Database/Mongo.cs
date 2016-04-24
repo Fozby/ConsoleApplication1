@@ -115,7 +115,7 @@ namespace ConsoleApplication1
 
         public List<Game> getARAMGames()
         {
-            var sort = Builders<Game>.Sort.Ascending("gameId").Ascending("summonerId");
+            var sort = Builders<Game>.Sort.Ascending("championId").Ascending("summonerId").Ascending("gameId");
 
             var games = gameCollection.Find(Builders<Game>.Filter.Eq("gameMode", "ARAM")).Sort(sort).ToList();
             return games;
@@ -232,6 +232,12 @@ namespace ConsoleApplication1
         {
             var filter = Builders<FeaturedGame>.Filter.ElemMatch(g => g.participants, g => g.championId == championId);
             return featuredGameCollection.Find(filter).ToList();
+        }
+
+        public List<Game> getGamesForChampion(int championId)
+        {
+            var filter = Builders<Game>.Filter.Eq("championId", championId);
+            return gameCollection.Find(filter).ToList();
         }
     }
 }

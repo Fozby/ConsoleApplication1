@@ -20,7 +20,7 @@ namespace ConsoleApplication1
         private const long SUMMONER_ID_MACABROS9 = 601322;
         private const long SUMMONER_ID_RISHVAS = 891580;
         private const long SUMMONER_ID_RISHMAU = 6160582;
-        private const long SUMMONER_ID_IGAR = 577854;
+        public const long SUMMONER_ID_IGAR = 577854;
 
         public static Dictionary<int, string> champions = new Dictionary<int, string>();
 

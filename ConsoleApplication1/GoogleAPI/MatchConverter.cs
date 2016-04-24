@@ -26,12 +26,12 @@ namespace ConsoleApplication1.GoogleNS
             players.Add(601322, "Macabros9");
             players.Add(891580, "Rishvas");
             players.Add(6160582, "Rishmau");
+            players.Add(Global.SUMMONER_ID_IGAR, "Igar");
+
         }
 
         public GameRow buildGoogleRow(Game game, TeamStats teamStats)
         {
-            string championName = game.championId.ToString();
-
             string playerName = game.summonerId.ToString();
             players.TryGetValue(game.summonerId, out playerName);
 
@@ -41,7 +41,7 @@ namespace ConsoleApplication1.GoogleNS
             DateTime dt = FromUnixTime(game.createDate);
             row.matchDate = dt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
             row.player = playerName;
-            row.champion = championName;
+            row.champion = Global.getChampionName(game.championId);
             row.win = game.stats.win;
             row.kills = game.stats.championsKilled;
             row.deaths = game.stats.numDeaths;
