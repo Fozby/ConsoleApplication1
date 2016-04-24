@@ -2,6 +2,10 @@
 using ConsoleApplication1.GoogleAPI;
 using ConsoleApplication1.RiotAPI;
 using ConsoleApplication1.Database;
+using ConsoleApplication1.RiotAPI.Entities.RecentGames;
+using System.Collections.Generic;
+using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
+using ConsoleApplication1.RiotAPI.Entities.FeaturedGames;
 
 namespace ConsoleApplication1
 {
@@ -15,38 +19,94 @@ namespace ConsoleApplication1
         static void Main(string[] args)
         {
             Console.WriteLine("Starting...");
-            //Console.ReadLine();
             StatCollector collector = new StatCollector(mongo, riot, google);
-           // Global.loadChampions(riot.getChampions()); //TODO store in mongodb to avoid an unnessary call
+            Global.loadChampions(riot.getChampions()); //TODO store in mongodb to avoid an unnessary call
 
             Console.WriteLine("Adding recent games...");
-            collector.CollectRecentGames();
+            //collector.CollectRecentGames();
+
+            Cleanup();
 
             while (true)
             {
                 Console.WriteLine("Insert command");
                 string input = Console.ReadLine();
 
-                if (input == "feat")
+                if (input == "featured")
                 {
                     collector.CollectFeaturedGames();
                 }
-                else if (input == "upload")
-                {
-                    //List<Game> allGames = mongo.getARAMGames();
-
-                    //foreach (Game game in allGames)
-                    //{
-                    //    uploadGame(game);
-                    //}
-                }
-                else if (input == "stats")
+                else if (input == "player")
                 {
                     collector.UploadPlayerStats();
                 }
-                else if (input == "foo")
+                else if (input == "champion")
                 {
                     collector.UploadChampionStats();
+                }
+            }
+        }
+
+        static void Cleanup()
+        {
+            CleanupRecentGames();
+            CleanupFeaturedGames();
+        }
+
+        static void CleanupRecentGames()
+        {
+            List<RecentGame> recentGames = mongo.getAllRecentGames();
+
+            foreach (RecentGame recentGame in recentGames)
+            {
+                MatchDetails match = mongo.GetMatch(recentGame.gameId);
+
+                if (match == null)
+                {
+                    //TODO should only delete if GameDataNotFound error (shouldnt delete if server is down)
+                    try
+                    {
+                        MatchDetails newMatch = riot.getMatch(recentGame.gameId);
+
+                        if (newMatch != null)
+                        {
+                            mongo.insertMatch(newMatch);
+                        }
+                    }
+                    catch (DataNotFoundException e)
+                    {
+                        Console.WriteLine($"No internal or riot record for {recentGame.gameId}. Deleting game");
+                        mongo.DeleteRecentGame(recentGame.gameId);
+                    }
+                }
+            }
+        }
+
+        static void CleanupFeaturedGames()
+        {
+            List<FeaturedGame> featuredGames = mongo.GetAllFeaturedGames();
+
+            foreach (FeaturedGame featuredGame in featuredGames)
+            {
+                MatchDetails match = mongo.GetMatch(featuredGame.gameId);
+
+                if (match == null)
+                {
+                    //TODO should only delete if GameDataNotFound error (shouldnt delete if server is down)
+                    try
+                    {
+                        MatchDetails newMatch = riot.getMatch(featuredGame.gameId);
+
+                        if (newMatch != null)
+                        {
+                            mongo.insertMatch(newMatch);
+                        }
+                    }
+                    catch (DataNotFoundException e)
+                    {
+                        Console.WriteLine($"No internal or riot record for {featuredGame.gameId}. Deleting game");
+                        mongo.deleteFeaturedGame(featuredGame.gameId);
+                    }
                 }
             }
         }

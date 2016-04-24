@@ -12,7 +12,7 @@ namespace ConsoleApplication1.Database
     { 
         private MongoClient theClient;
         private IMongoDatabase theDataBase;
-        private IMongoCollection<Game> gameCollection;
+        private IMongoCollection<RecentGame> gameCollection;
         private IMongoCollection<MatchDetails> matchCollection;
         private IMongoCollection<FeaturedGame> featuredGameCollection;
 
@@ -20,7 +20,7 @@ namespace ConsoleApplication1.Database
         {
             theClient = new MongoClient("mongodb://localhost:27017");
             theDataBase = theClient.GetDatabase("Riot_1");
-            gameCollection = theDataBase.GetCollection<Game>("Game_1");
+            gameCollection = theDataBase.GetCollection<RecentGame>("Game_1");
             matchCollection = theDataBase.GetCollection<MatchDetails>("Match_1");
             featuredGameCollection = theDataBase.GetCollection<FeaturedGame>("FeaturedGame_1");
 
@@ -35,10 +35,10 @@ namespace ConsoleApplication1.Database
                 CreateIndexOptions cio = new CreateIndexOptions();
                 cio.Unique = true;
 
-                IndexKeysDefinition<Game> gameId = Builders<Game>.IndexKeys.Ascending(_ => _.gameId);
-                IndexKeysDefinition<Game> summonerId = Builders<Game>.IndexKeys.Ascending(_ => _.summonerId);
+                IndexKeysDefinition<RecentGame> gameId = Builders<RecentGame>.IndexKeys.Ascending(_ => _.gameId);
+                IndexKeysDefinition<RecentGame> summonerId = Builders<RecentGame>.IndexKeys.Ascending(_ => _.summonerId);
 
-                gameCollection.Indexes.CreateOne(Builders<Game>.IndexKeys.Combine(gameId, summonerId), cio);
+                gameCollection.Indexes.CreateOne(Builders<RecentGame>.IndexKeys.Combine(gameId, summonerId), cio);
             }
 
             //Add matchId as a Unique Index (Primary Key)
@@ -58,7 +58,7 @@ namespace ConsoleApplication1.Database
             }
         }
 
-        public bool insertGame(Game game)
+        public bool insertGame(RecentGame game)
         {
             try
             {
@@ -67,7 +67,7 @@ namespace ConsoleApplication1.Database
             }
             catch (MongoWriteException e)
             {
-                if(e.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                if (e.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
                     //Comment out for now, too much spam
                     //Console.WriteLine("Error adding Game with GameID: [" + game.gameId + "]. Duplicate Game already exists.");
@@ -75,16 +75,23 @@ namespace ConsoleApplication1.Database
                 else
                 {
                     Console.WriteLine("Unhandled exception inserting Game with GameID: [" + game.gameId + "]." + e);
+                    throw e;
                 }
             }
 
             return false;
         }
 
-        public int insertGames(List<Game> games)
+        public void DeleteRecentGame(long gameId)
+        {
+            var filter = Builders<RecentGame>.Filter.Eq("gameId", gameId);
+            gameCollection.DeleteOne(filter);
+        }
+
+        public int insertGames(List<RecentGame> games)
         {
             int numAdded = 0;
-            foreach(Game game in games)
+            foreach(RecentGame game in games)
             {
                 if (insertGame(game))
                 {
@@ -95,61 +102,30 @@ namespace ConsoleApplication1.Database
             return numAdded;
         }
 
-        public Game getGame(long gameId)
+        public List<RecentGame> getAllRecentGames()
         {
-            List<Game> games = gameCollection.Find(Builders<Game>.Filter.Eq("gameId", gameId)).ToList();
-            var game = games.ElementAt(0);
-            return game;
-        }
+            var sort = Builders<RecentGame>.Sort.Ascending("championId").Ascending("summonerId").Ascending("gameId");
 
-        public List<Game> getAllGames()
-        {
-            var games = gameCollection.Find(Builders<Game>.Filter.Empty).ToList();
+            var games = gameCollection.Find(Builders<RecentGame>.Filter.Empty).Sort(sort).ToList();
             return games;
         }
 
-        public List<Game> getARAMGames()
+        public List<RecentGame> getRecentGamesForPlayer(long summonerId)
         {
-            var sort = Builders<Game>.Sort.Ascending("championId").Ascending("summonerId").Ascending("gameId");
-
-            var games = gameCollection.Find(Builders<Game>.Filter.Eq("gameMode", "ARAM")).Sort(sort).ToList();
-            return games;
-        }
-
-        public List<Game> getARAMGamesForPlayer(long summonerId)
-        {
-            var builder = Builders<Game>.Filter;
-            var filter = builder.Eq("summonerId", summonerId) &
-                         builder.Eq("gameMode", "ARAM");
+            var builder = Builders<RecentGame>.Filter;
+            var filter = builder.Eq("summonerId", summonerId);
 
             var games = gameCollection.Find(filter).ToList();
 
             return games;
         }
 
-        public List<string> getFeaturedPlayers()
+        public List<RecentGame> GetRecentGamesForChampion(int championId)
         {
-            List<String> names = new List<String>();
+            var builder = Builders<RecentGame>.Filter;
+            var filter = builder.Eq("championId", championId);
 
-            List<FeaturedGame> games = featuredGameCollection.Find(Builders<FeaturedGame>.Filter.Empty).ToList();
-
-            foreach (FeaturedGame game in games)
-            {
-                foreach (FeaturedGameParticipant participant in game.participants)
-                {
-                    if (!names.Contains(participant.summonerName))
-                    {
-                        names.Add(participant.summonerName);
-                    }
-                }
-            }
-
-            return names;
-        }
-
-        public long getCount()
-        {
-            return gameCollection.Count(Builders<Game>.Filter.Empty);
+            return gameCollection.Find(filter).ToList();
         }
 
         public void insertMatch(MatchDetails match)
@@ -172,7 +148,7 @@ namespace ConsoleApplication1.Database
             }
         }
 
-        public MatchDetails getMatch(long matchId)
+        public MatchDetails GetMatch(long matchId)
         {
             var matches = matchCollection.Find(Builders<MatchDetails>.Filter.Eq("matchId", matchId)).ToList();
 
@@ -214,6 +190,7 @@ namespace ConsoleApplication1.Database
                 else
                 {
                     Console.WriteLine("Unhandled exception inserting Featured Game with gameId: [" + game.gameId + "]." + e);
+                    throw e;
                 }
             }
         }
@@ -223,16 +200,23 @@ namespace ConsoleApplication1.Database
             return featuredGameCollection.Count(Builders<FeaturedGame>.Filter.Empty);
         }
 
-        public List<FeaturedGame> getFeaturedGamesForChampion(int championId)
+        public List<FeaturedGame> GetFeaturedGamesForChampion(int championId)
         {
-            var filter = Builders<FeaturedGame>.Filter.ElemMatch(g => g.participants, g => g.championId == championId);
+            var builder = Builders<FeaturedGame>.Filter;
+            var filter = builder.ElemMatch(g => g.participants, g => g.championId == championId);
+
             return featuredGameCollection.Find(filter).ToList();
         }
 
-        public List<Game> getGamesForChampion(int championId)
+        public List<FeaturedGame> GetAllFeaturedGames()
         {
-            var filter = Builders<Game>.Filter.Eq("championId", championId);
-            return gameCollection.Find(filter).ToList();
+            return featuredGameCollection.Find(Builders<FeaturedGame>.Filter.Empty).ToList();
+        }
+
+        public void deleteFeaturedGame(long gameId)
+        {
+            var filter = Builders<FeaturedGame>.Filter.Eq("gameId", gameId);
+            featuredGameCollection.DeleteOne(filter);
         }
     }
 }

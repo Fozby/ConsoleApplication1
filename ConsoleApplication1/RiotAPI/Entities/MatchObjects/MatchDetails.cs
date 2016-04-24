@@ -24,7 +24,7 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
         public List<Team> teams { get; set; }
         public Timeline timeline { get; set; }
 
-        public int getTeamIdForChampion(int championId)
+        public int GetTeamIdForChampion(int championId)
         {
             foreach (Participant participant in participants)
             {
@@ -38,7 +38,7 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
             throw new ArgumentException($"championId not found in match: {matchId}");
         }
 
-        public ParticipantStats getStatsForChampion(int championId)
+        public ParticipantStats GetStatsForChampion(int championId)
         {
             foreach (Participant participant in participants)
             {
@@ -52,7 +52,7 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
             throw new ArgumentException($"championId not found in match: {matchId}");
         }
 
-        public int getWinningTeam()
+        public int GetWinningTeam()
         {
             foreach (Team team in teams)
             {

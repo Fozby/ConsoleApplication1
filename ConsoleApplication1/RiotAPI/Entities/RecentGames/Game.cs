@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ConsoleApplication1.RiotAPI.Entities.RecentGames
 {
-    public class Game
+    public class RecentGame
     {
         public ObjectId Id { get; set; }
 

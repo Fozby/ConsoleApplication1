@@ -30,15 +30,34 @@ namespace ConsoleApplication1
             Console.WriteLine("Starting 5 minute timer to query featured games...");
             while (true)
             {
-                List<FeaturedGame> featuredAramGames = riot.getFeaturedGames();
-                if (featuredAramGames != null && featuredAramGames.Count > 0)
-                {
-                    mongo.insertFeaturedGames(featuredAramGames);
+                List<FeaturedGame> featuredGames = new List<FeaturedGame>();
 
-                    foreach (FeaturedGame aramGame in featuredAramGames)
+                try
+                {
+                    featuredGames = riot.getFeaturedGames();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Exception when querying for featured games. {e}");
+                    throw e;
+                }
+
+                if (featuredGames.Count > 0)
+                {
+                    mongo.insertFeaturedGames(featuredGames);
+
+                    foreach (FeaturedGame featuredGame in featuredGames)
                     {
-                        MatchDetails match = riot.getMatch(aramGame.gameId);
-                        mongo.insertMatch(match);
+                        try
+                        {
+                            MatchDetails match = riot.getMatch(featuredGame.gameId);
+                            mongo.insertMatch(match);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"Exception adding match for featured game {featuredGame.gameId}. {e}");
+                            throw e;
+                        }
                     }
                 }
                 Console.WriteLine($"[{DateTime.Now.ToString()}] Total featured games: {mongo.getFeaturedGameCount()}");
@@ -48,17 +67,28 @@ namespace ConsoleApplication1
 
         public void CollectRecentGames()
         {
-            List<Game> games = riot.getRecentGamesForAllPlayers();
-            int numAdded = mongo.insertGames(games);
-            Console.WriteLine($"Collected {numAdded} games. Total Recent Games: {mongo.getARAMGames().Count}");
+            List<RecentGame> recentGames = new List<RecentGame>();
+
+            try
+            {
+                recentGames = riot.getRecentGamesForAllPlayers();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception when querying for recent games: {e}");
+                throw e;
+            }
+
+            int numAdded = mongo.insertGames(recentGames);
+            Console.WriteLine($"Collected {numAdded} games. Total Recent Games: {mongo.getAllRecentGames().Count}");
         }
 
         public void UploadPlayerStats()
         {
             foreach (long summonerId in Global.players.Keys)
             {
-                List<Game> statGames = mongo.getARAMGamesForPlayer(summonerId);
-                PlayerStats stats = converter.BuildPlayerStats(getGameRows(statGames));
+                List<RecentGame> statGames = mongo.getRecentGamesForPlayer(summonerId);
+                PlayerStats stats = converter.BuildPlayerStats(BuildGameStats(statGames));
                 google.addPlayerStats(stats);
             }
         }
@@ -67,26 +97,26 @@ namespace ConsoleApplication1
         {
             foreach (int championId in Global.champions.Keys)
             {
-                List<MatchDetails> matches = getStatsForChampion(championId);
+                List<MatchDetails> matches = GetMatchesWithChampion(championId);
 
                 if (matches.Count > 0)
                 {
-                    ChampionStats stats = converter.GetChampionStats(championId, matches);
-                    google.addChampionStats(stats);
+                    ChampionStats stats = converter.BuildChampionStats(championId, matches);
+                    google.AddChampionStats(stats);
                 }
 
                 Console.WriteLine($"{matches.Count} found for champion {championId} aka {Global.getChampionName(championId)}");
             }
         }
 
-        private List<MatchDetails> getStatsForChampion(int championId)
+        private List<MatchDetails> GetMatchesWithChampion(int championId)
         {
             List<MatchDetails> matchesWithChampion = new List<MatchDetails>();
 
-            List<FeaturedGame> featuredGames = mongo.getFeaturedGamesForChampion(championId);
+            List<FeaturedGame> featuredGames = mongo.GetFeaturedGamesForChampion(championId);
             foreach (FeaturedGame featuredGame in featuredGames)
             {
-                MatchDetails match = mongo.getMatch(featuredGame.gameId);
+                MatchDetails match = mongo.GetMatch(featuredGame.gameId);
 
                 if (!matchesWithChampion.Contains(match))
                 {
@@ -94,11 +124,11 @@ namespace ConsoleApplication1
                 }
             }
 
-            List<Game> games = mongo.getGamesForChampion(championId);
+            List<RecentGame> games = mongo.GetRecentGamesForChampion(championId);
 
-            foreach (Game game in games)
+            foreach (RecentGame game in games)
             {
-                MatchDetails match = mongo.getMatch(game.gameId);
+                MatchDetails match = mongo.GetMatch(game.gameId);
 
                 if (!matchesWithChampion.Contains(match))
                 {
@@ -109,25 +139,17 @@ namespace ConsoleApplication1
             return matchesWithChampion;
         }
 
-        private List<GameRow> getGameRows(List<Game> games)
+        private List<GameStats> BuildGameStats(List<RecentGame> games)
         {
-            List<GameRow> gameRows = new List<GameRow>();
+            List<GameStats> gameRows = new List<GameStats>();
 
-            foreach (Game game in games)
-            { 
-                gameRows.Add(getGameRow(game));
+            foreach (RecentGame game in games)
+            {
+                MatchDetails match = mongo.GetMatch(game.gameId);
+                gameRows.Add(converter.BuildGameStats(game, match));
             }
 
             return gameRows;
-        }
-
-        private GameRow getGameRow(Game game)
-        {
-            long matchId = game.gameId;
-            int teamId = game.teamId;
-            MatchDetails match = mongo.getMatch(matchId);
-         
-            return converter.BuildGameStats(game, match, teamId);
         }
     }
 }

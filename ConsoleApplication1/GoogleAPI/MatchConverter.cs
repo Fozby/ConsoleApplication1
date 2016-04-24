@@ -9,56 +9,40 @@ namespace ConsoleApplication1.GoogleAPI
 {
     class MatchConverter
     {
-        //static Dictionary<long, string> players = new Dictionary<long, string>();
 
-        public MatchConverter()
+        public GameStats BuildGameStats(RecentGame game, MatchDetails match)
         {
-            //players.Add(356367, "Etaram");
-            //players.Add(557862, "Phythe");
-            //players.Add(692409, "Celinar");
-            //players.Add(464473, "Mirotica");
-            //players.Add(470159, "Scorilous");
-            //players.Add(485547, "Druzor");
-            //players.Add(603309, "Wart");
-            //players.Add(2120419, "NewBula");
-            //players.Add(601322, "Macabros9");
-            //players.Add(891580, "Rishvas");
-            //players.Add(6160582, "Rishmau");
-            //players.Add(Global.SUMMONER_ID_IGAR, "Igar");
-        }
-
-        public GameRow BuildGameStats(Game game, MatchDetails match, int teamId)
-        {
-            TeamStats teamStats = GetTeamStats(match, teamId);
+            int teamId = game.teamId;
+            TeamStats teamStats = BuildTeamStats(match, teamId);
 
             string playerName = game.summonerId.ToString();
             Global.players.TryGetValue(game.summonerId, out playerName);
 
-            GameRow row = new GameRow();
+            GameStats gameStats = new GameStats();
 
-            row.gameId = game.gameId;
+            gameStats.gameId = game.gameId;
             DateTime dt = FromUnixTime(game.createDate);
-            row.matchDate = dt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
-            row.player = playerName;
-            row.champion = Global.getChampionName(game.championId);
-            row.win = game.stats.win;
-            row.kills = game.stats.championsKilled;
-            row.deaths = game.stats.numDeaths;
-            row.assists = game.stats.assists;
-            row.killsAsPct = (double)row.kills / (double)teamStats.kills;
-            row.deathsAsPct = (double)row.deaths / (double)teamStats.deaths;
-            row.assistsAsPct = (double)row.assists / (double)teamStats.assists;
-            row.killParticipation = (double)(row.kills + row.assists) / (double)teamStats.kills;
-            row.minionDmgAsPct = (double)(game.stats.totalDamageDealt - game.stats.totalDamageDealtToChampions) / (double)teamStats.minionDmg;
-            row.minionKillsAsPct = (double)game.stats.minionsKilled / (double)teamStats.minionKills;
-            row.playerDmgAsPct = (double)game.stats.totalDamageDealtToChampions / (double)teamStats.playerDmg;
-            row.dmgTakenAsPct = (double)game.stats.totalDamageTaken / (double)teamStats.dmgTaken;
-            row.goldEarnedAsPct = (double)game.stats.goldEarned / (double)teamStats.gold;
+            gameStats.matchDate = dt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+            gameStats.player = playerName;
+            gameStats.champion = Global.getChampionName(game.championId);
+            gameStats.win = game.stats.win;
+            gameStats.kills = game.stats.championsKilled;
+            gameStats.deaths = game.stats.numDeaths;
+            gameStats.assists = game.stats.assists;
+            gameStats.killsAsPct = (double)gameStats.kills / (double)teamStats.kills;
+            gameStats.deathsAsPct = (double)gameStats.deaths / (double)teamStats.deaths;
+            gameStats.assistsAsPct = (double)gameStats.assists / (double)teamStats.assists;
+            gameStats.killParticipation = (double)(gameStats.kills + gameStats.assists) / (double)teamStats.kills;
+            gameStats.minionDmgAsPct = (double)(game.stats.totalDamageDealt - game.stats.totalDamageDealtToChampions) / (double)teamStats.minionDmg;
+            gameStats.minionKillsAsPct = (double)game.stats.minionsKilled / (double)teamStats.minionKills;
+            gameStats.playerDmgAsPct = (double)game.stats.totalDamageDealtToChampions / (double)teamStats.playerDmg;
+            gameStats.dmgTakenAsPct = (double)game.stats.totalDamageTaken / (double)teamStats.dmgTaken;
+            gameStats.goldEarnedAsPct = (double)game.stats.goldEarned / (double)teamStats.gold;
 
-            return row;
+            return gameStats;
         }
 
-        public PlayerStats BuildPlayerStats(List<GameRow> games)
+        public PlayerStats BuildPlayerStats(List<GameStats> games)
         {
             PlayerStats playerStats = new PlayerStats();
 
@@ -79,7 +63,7 @@ namespace ConsoleApplication1.GoogleAPI
             double totalDmgTakenPct = 0.0;
             double totalGoldPct = 0.0;
 
-            foreach (GameRow game in games)
+            foreach (GameStats game in games)
             {
 
                 if (game.win)
@@ -118,7 +102,7 @@ namespace ConsoleApplication1.GoogleAPI
             return playerStats;
         }
 
-        public ChampionStats GetChampionStats(int championId, List<MatchDetails> matches)
+        public ChampionStats BuildChampionStats(int championId, List<MatchDetails> matches)
         {
             ChampionStats championStats = new ChampionStats();
 
@@ -145,12 +129,11 @@ namespace ConsoleApplication1.GoogleAPI
             long teamPlayerDmg = 0;
             long teamDmgTaken = 0;
 
-
             foreach (MatchDetails match in matches)
             {
-                int teamId = match.getTeamIdForChampion(championId);
-                ParticipantStats individualStats = match.getStatsForChampion(championId);
-                TeamStats teamStats = GetTeamStats(match, teamId);
+                int teamId = match.GetTeamIdForChampion(championId);
+                ParticipantStats individualStats = match.GetStatsForChampion(championId);
+                TeamStats teamStats = BuildTeamStats(match, teamId);
 
                 individualKills += individualStats.kills;
                 individualDeaths += individualStats.deaths;
@@ -170,7 +153,7 @@ namespace ConsoleApplication1.GoogleAPI
                 teamPlayerDmg += teamStats.playerDmg;
                 teamDmgTaken += teamStats.dmgTaken;
 
-                if (teamId == match.getWinningTeam())
+                if (teamId == match.GetWinningTeam())
                 {
                     numWin += 1;
                 }
@@ -193,8 +176,7 @@ namespace ConsoleApplication1.GoogleAPI
             return championStats;
         }
     
-
-        private TeamStats GetTeamStats(MatchDetails match, int teamId)
+        private TeamStats BuildTeamStats(MatchDetails match, int teamId)
         {
             TeamStats teamStats = new TeamStats();
 
@@ -215,68 +197,72 @@ namespace ConsoleApplication1.GoogleAPI
             return teamStats;
         }
 
-        public Dictionary<string, GameRow> convert(MatchDetails match)
-        {
-            Dictionary<string, GameRow> rows = new Dictionary<string, GameRow>();
-
-            long teamKills = 0;
-            long teamDeaths = 0;
-            long teamAssists = 0;
-            long teamPlayerDmg = 0;
-            long teamMinionDmg = 0;
-            long teamDmgTaken = 0;
-            long teamGold = 0;
-            long teamMinionKills = 0;
-
-            //participantId, summonerName
-            Dictionary<int, string> map = match.participantIdentities.ToDictionary(k => k.participantId, v => v.player.summonerName);
-
-            foreach (Participant participant in match.participants)
-            {
-                teamKills += participant.stats.kills;
-                teamDeaths += participant.stats.deaths;
-                teamAssists += participant.stats.assists;
-                teamPlayerDmg += participant.stats.totalDamageDealtToChampions;
-                teamMinionDmg += (participant.stats.totalDamageDealt - participant.stats.totalDamageDealtToChampions);
-                teamDmgTaken += participant.stats.totalDamageTaken;
-                teamGold += participant.stats.goldEarned;
-                teamMinionKills += participant.stats.minionsKilled;
-            }
-
-            foreach (Participant participant in match.participants)
-            {
-                string player;
-                map.TryGetValue(participant.participantId, out player);
-
-                GameRow row = new GameRow();
-                row.gameId = match.matchId;
-                row.player = player;
-                row.champion = participant.championId.ToString();
-                row.win = participant.stats.winner;
-                row.kills = participant.stats.kills;
-                row.deaths = participant.stats.deaths;
-                row.assists = participant.stats.assists;
-                row.killsAsPct = row.kills / teamKills;
-                row.deathsAsPct = row.deaths / teamDeaths;
-                row.assistsAsPct = row.assists / teamAssists;
-                row.killParticipation = (row.kills + row.assists) / teamKills;
-                row.minionDmgAsPct = (participant.stats.totalDamageDealt - participant.stats.totalDamageDealtToChampions) / teamMinionDmg;
-                row.minionKillsAsPct = participant.stats.minionsKilled / teamMinionKills;
-                row.playerDmgAsPct = participant.stats.totalDamageDealtToChampions / teamPlayerDmg;
-                row.dmgTakenAsPct = participant.stats.totalDamageTaken / teamDmgTaken;
-                row.goldEarnedAsPct = participant.stats.goldEarned / teamGold;
-
-                rows.Add(player, row);
-            }
-
-            return rows;
-        }
-
-        public DateTime FromUnixTime(long unixTime)
+        private DateTime FromUnixTime(long unixTime)
         {
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return epoch.AddMilliseconds(unixTime);
         }
+
+        //public Dictionary<string, GameStats> convert(MatchDetails match)
+        //{
+        //    Dictionary<string, GameStats> rows = new Dictionary<string, GameStats>();
+
+        //    long teamKills = 0;
+        //    long teamDeaths = 0;
+        //    long teamAssists = 0;
+        //    long teamPlayerDmg = 0;
+        //    long teamMinionDmg = 0;
+        //    long teamDmgTaken = 0;
+        //    long teamGold = 0;
+        //    long teamMinionKills = 0;
+
+        //    //participantId, summonerName
+        //    Dictionary<int, string> map = match.participantIdentities.ToDictionary(k => k.participantId, v => v.player.summonerName);
+
+        //    foreach (Participant participant in match.participants)
+        //    {
+        //        teamKills += participant.stats.kills;
+        //        teamDeaths += participant.stats.deaths;
+        //        teamAssists += participant.stats.assists;
+        //        teamPlayerDmg += participant.stats.totalDamageDealtToChampions;
+        //        teamMinionDmg += (participant.stats.totalDamageDealt - participant.stats.totalDamageDealtToChampions);
+        //        teamDmgTaken += participant.stats.totalDamageTaken;
+        //        teamGold += participant.stats.goldEarned;
+        //        teamMinionKills += participant.stats.minionsKilled;
+        //    }
+
+        //    foreach (Participant participant in match.participants)
+        //    {
+        //        string player;
+        //        map.TryGetValue(participant.participantId, out player);
+
+        //        GameStats row = new GameStats();
+        //        row.gameId = match.matchId;
+        //        row.player = player;
+        //        row.champion = participant.championId.ToString();
+        //        row.win = participant.stats.winner;
+        //        row.kills = participant.stats.kills;
+        //        row.deaths = participant.stats.deaths;
+        //        row.assists = participant.stats.assists;
+        //        row.killsAsPct = row.kills / teamKills;
+        //        row.deathsAsPct = row.deaths / teamDeaths;
+        //        row.assistsAsPct = row.assists / teamAssists;
+        //        row.killParticipation = (row.kills + row.assists) / teamKills;
+        //        row.minionDmgAsPct = (participant.stats.totalDamageDealt - participant.stats.totalDamageDealtToChampions) / teamMinionDmg;
+        //        row.minionKillsAsPct = participant.stats.minionsKilled / teamMinionKills;
+        //        row.playerDmgAsPct = participant.stats.totalDamageDealtToChampions / teamPlayerDmg;
+        //        row.dmgTakenAsPct = participant.stats.totalDamageTaken / teamDmgTaken;
+        //        row.goldEarnedAsPct = participant.stats.goldEarned / teamGold;
+
+        //        rows.Add(player, row);
+        //    }
+
+        //    return rows;
+        //}
+
+
+
+
 
     }
 }

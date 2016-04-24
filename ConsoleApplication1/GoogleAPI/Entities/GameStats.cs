@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ConsoleApplication1.GoogleAPI.Entities
 {
-    public class GameRow
+    public class GameStats
     {
         public long gameId { get; set; }
         public string matchDate { get; set; }

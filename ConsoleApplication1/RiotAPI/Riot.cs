@@ -42,27 +42,30 @@ namespace ConsoleApplication1.RiotAPI
             }
         }
 
-        public List<Game> getRecentGames(long summonerId)
+        public List<RecentGame> getRecentGames(long summonerId)
         {
             string resource = String.Format(RECENT_GAMES_RESOURCE, summonerId);
             Response_RecentGames response = RiotApiRequest<Response_RecentGames>(resource);
 
-            List<Game> games = response?.games ?? new List<Game>(); // don't die on null response
-            foreach (Game game in games)
+            List<RecentGame> games = response?.games ?? new List<RecentGame>(); // don't die on null response
+
+            List<RecentGame> aramGames = games.FindAll(g => g.gameMode == "ARAM");
+
+            foreach (RecentGame game in aramGames)
             {
                 game.summonerId = summonerId;
             }
 
-            return games;
-
+            return aramGames;
         }
 
-        public List<Game> getRecentGamesForAllPlayers()
+        public List<RecentGame> getRecentGamesForAllPlayers()
         {
-            List<Game> games = new List<Game>();
+            List<RecentGame> games = new List<RecentGame>();
 
             foreach (long summonerId in Global.players.Keys)
             {
+                Console.WriteLine($"Finding recent games for {Global.GetPlayerName(summonerId)}");
                 games.AddRange(getRecentGames(summonerId));
             }
 
@@ -93,6 +96,10 @@ namespace ConsoleApplication1.RiotAPI
                     {
                         return response.Data;
                     }
+                case RiotHttpStatusCode.GameDataNotFound:
+                   {
+                        throw new DataNotFoundException();
+                   }
                 case RiotHttpStatusCode.RateLimitExceeded:
                     {
                         string retry = response.Headers.Where(a => a.Name.Equals("Retry-After")).Select(b => b.Value.ToString()).FirstOrDefault();

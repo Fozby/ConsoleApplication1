@@ -49,7 +49,7 @@ namespace ConsoleApplication1.GoogleAPI
             });
         }
 
-        public void addGame(GameRow row)
+        public void addGame(GameStats row)
         {
             List<object> _params = new List<object>();
             _params.Add(row);
@@ -65,7 +65,7 @@ namespace ConsoleApplication1.GoogleAPI
             callMethod("addPlayerStats", _params);
         }
 
-        public void addChampionStats(ChampionStats stats)
+        public void AddChampionStats(ChampionStats stats)
         {
             List<object> _params = new List<object>();
             _params.Add(stats);

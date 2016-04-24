@@ -55,5 +55,13 @@ namespace ConsoleApplication1
             return championName;
         }
 
+       public static string GetPlayerName(long summonerId)
+        {
+            string playerName = summonerId.ToString();
+            players.TryGetValue(summonerId, out playerName);
+
+            return playerName;
+        }
+
     }
 }

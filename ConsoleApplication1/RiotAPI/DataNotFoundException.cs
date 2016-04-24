@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleApplication1.GoogleAPI.Entities
+namespace ConsoleApplication1.RiotAPI
 {
-    class ChampionRow
+    class DataNotFoundException: Exception
     {
-        public long championId { get; set; }
-
     }
 }

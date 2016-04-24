@@ -104,11 +104,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Global.cs" />
-    <Compile Include="GoogleAPI\Entities\ChampionRow.cs" />
+    <Compile Include="GoogleAPI\Entities\CompetitiveChampionStats.cs" />
     <Compile Include="GoogleAPI\Entities\ChampionStats.cs" />
     <Compile Include="GoogleAPI\GoogleSheets.cs" />
-    <Compile Include="GoogleAPI\Entities\GameRow.cs" />
+    <Compile Include="GoogleAPI\Entities\GameStats.cs" />
     <Compile Include="GoogleAPI\MatchConverter.cs" />
+    <Compile Include="RiotAPI\DataNotFoundException.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\ChampionDto.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\ChampionList.cs" />
     <Compile Include="RiotAPI\Entities\FeaturedGames\FeaturedGame.cs" />
