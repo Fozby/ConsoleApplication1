@@ -1,7 +1,4 @@
-﻿using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
-using System.Collections.Generic;
-
-namespace ConsoleApplication1.GoogleAPI.Entities
+﻿namespace ConsoleApplication1.GoogleAPI.Entities
 {
     class ChampionStats
     {

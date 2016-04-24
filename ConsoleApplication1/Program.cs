@@ -24,6 +24,7 @@ namespace ConsoleApplication1
 
             Console.WriteLine("Adding recent games...");
             //collector.CollectRecentGames();
+            collector.UploadCompetitiveChampionStats();
 
             Cleanup();
 
@@ -43,6 +44,10 @@ namespace ConsoleApplication1
                 else if (input == "champion")
                 {
                     collector.UploadChampionStats();
+                }
+                else if (input == "competitive")
+                {
+                    collector.UploadCompetitiveChampionStats();
                 }
             }
         }

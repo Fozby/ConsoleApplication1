@@ -9,6 +9,26 @@ namespace ConsoleApplication1.GoogleAPI
 {
     class MatchConverter
     {
+        public CompetitiveChampionStats BuildCompetitiveChampionStats(int championId, List<MatchDetails> matches, Dictionary<long, List<GameStats>> playerGames)
+        {
+            CompetitiveChampionStats stats = new CompetitiveChampionStats();
+
+            stats.championStats = BuildChampionStats(championId, matches);
+            
+            foreach(long summonerId in playerGames.Keys)
+            {
+                List<GameStats> recentGames = new List<GameStats>();
+                playerGames.TryGetValue(summonerId, out recentGames);
+
+                if (playerGames.Count > 0)
+                {
+                    PlayerStats playerStats = BuildPlayerStats(recentGames);
+                    stats.playerStats.Add(Global.GetPlayerName(summonerId), playerStats);
+                }
+            }
+
+            return stats;
+        }
 
         public GameStats BuildGameStats(RecentGame game, MatchDetails match)
         {

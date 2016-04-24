@@ -135,7 +135,7 @@
     <Compile Include="GoogleAPI\Entities\TeamStats.cs" />
     <Compile Include="RiotAPI\Riot.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\FellowPlayer.cs" />
-    <Compile Include="RiotAPI\Entities\RecentGames\Game.cs" />
+    <Compile Include="RiotAPI\Entities\RecentGames\RecentGame.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\Response_RecentGames.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\Stats.cs" />
     <Compile Include="Database\Mongo.cs" />

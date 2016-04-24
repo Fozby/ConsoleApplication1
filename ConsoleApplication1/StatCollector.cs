@@ -89,7 +89,7 @@ namespace ConsoleApplication1
             {
                 List<RecentGame> statGames = mongo.getRecentGamesForPlayer(summonerId);
                 PlayerStats stats = converter.BuildPlayerStats(BuildGameStats(statGames));
-                google.addPlayerStats(stats);
+                google.AddPlayerStats(stats);
             }
         }
 
@@ -106,6 +106,31 @@ namespace ConsoleApplication1
                 }
 
                 Console.WriteLine($"{matches.Count} found for champion {championId} aka {Global.getChampionName(championId)}");
+            }
+        }
+
+        public void UploadCompetitiveChampionStats()
+        {
+            foreach (int championId in Global.champions.Keys)
+            {
+                List<MatchDetails> matches = GetMatchesWithChampion(championId);
+                if (matches.Count > 0)
+                {
+                    Dictionary<long, List<GameStats>> playerStats = new Dictionary<long, List<GameStats>>(); //<SummonerID, [List of Recent Games]
+
+                    foreach (int summonerId in Global.players.Keys)
+                    {
+                        List<RecentGame> recentGames = mongo.GetRecentGamesForChampionAndSummoner(championId, summonerId);
+
+                        if (recentGames.Count > 0)
+                        {
+                            playerStats.Add(summonerId, BuildGameStats(recentGames));
+                        }
+                    }
+
+                    CompetitiveChampionStats stats = converter.BuildCompetitiveChampionStats(championId, matches, playerStats);
+                    google.AddCompetitiveChampionStats(stats);
+                }
             }
         }
 

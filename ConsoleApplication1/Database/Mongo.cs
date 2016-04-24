@@ -128,6 +128,15 @@ namespace ConsoleApplication1.Database
             return gameCollection.Find(filter).ToList();
         }
 
+        public List<RecentGame> GetRecentGamesForChampionAndSummoner(int championId, long summonerId)
+        {
+            var builder = Builders<RecentGame>.Filter;
+            var filter = builder.Eq("championId", championId) &
+                            builder.Eq("summonerId", summonerId);
+
+            return gameCollection.Find(filter).ToList();
+        }
+
         public void insertMatch(MatchDetails match)
         {
             try

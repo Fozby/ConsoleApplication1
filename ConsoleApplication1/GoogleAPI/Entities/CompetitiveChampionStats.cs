@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ConsoleApplication1.GoogleAPI.Entities
 {
     class CompetitiveChampionStats
     {
-        public long championId { get; set; }
-
+        public ChampionStats championStats { get; set; }
+        public Dictionary<string, PlayerStats> playerStats { get; set; } = new Dictionary<string, PlayerStats>();
     }
 }

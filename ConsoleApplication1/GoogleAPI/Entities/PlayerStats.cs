@@ -1,5 +1,4 @@
-﻿
-namespace ConsoleApplication1.GoogleAPI.Entities
+﻿namespace ConsoleApplication1.GoogleAPI.Entities
 {
     public class PlayerStats
     {
@@ -20,5 +19,3 @@ namespace ConsoleApplication1.GoogleAPI.Entities
         public double avgGoldPct { get; set; }
     }
 }
-
-
