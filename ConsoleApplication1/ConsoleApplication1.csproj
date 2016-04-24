@@ -106,7 +106,7 @@
     <Compile Include="Global.cs" />
     <Compile Include="GoogleAPI\Entities\ChampionRow.cs" />
     <Compile Include="GoogleAPI\Entities\ChampionStats.cs" />
-    <Compile Include="GoogleAPI\GoogleAPI.cs" />
+    <Compile Include="GoogleAPI\GoogleSheets.cs" />
     <Compile Include="GoogleAPI\Entities\GameRow.cs" />
     <Compile Include="GoogleAPI\MatchConverter.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\ChampionDto.cs" />
@@ -129,7 +129,7 @@
     <Compile Include="RiotAPI\Entities\MatchObjects\Participant.cs" />
     <Compile Include="RiotAPI\Entities\MatchObjects\ParticipantIdentity .cs" />
     <Compile Include="RiotAPI\Entities\MatchObjects\Timeline.cs" />
-    <Compile Include="RiotAPI\Entities\RecentGames\ParticipantTimelineData.cs" />
+    <Compile Include="RiotAPI\Entities\MatchObjects\ParticipantTimelineData.cs" />
     <Compile Include="GoogleAPI\Entities\PlayerStats.cs" />
     <Compile Include="GoogleAPI\Entities\TeamStats.cs" />
     <Compile Include="RiotAPI\Riot.cs" />
@@ -141,6 +141,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RiotAPI\RiotHttpStatusCode.cs" />
+    <Compile Include="StatCollector.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

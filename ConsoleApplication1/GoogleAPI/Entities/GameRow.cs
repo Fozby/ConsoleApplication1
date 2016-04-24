@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleApplication1.GoogleNS
+namespace ConsoleApplication1.GoogleAPI.Entities
 {
     public class GameRow
     {

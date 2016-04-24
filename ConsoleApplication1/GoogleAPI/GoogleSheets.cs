@@ -1,5 +1,4 @@
-﻿using ConsoleApplication1.GoogleNS.Entities;
-using ConsoleApplication1.Objects;
+﻿using ConsoleApplication1.GoogleAPI.Entities;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Script.v1;
 using Google.Apis.Script.v1.Data;
@@ -10,9 +9,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
-namespace ConsoleApplication1.GoogleNS
+namespace ConsoleApplication1.GoogleAPI
 {
-    class GoogleAPI
+    class GoogleSheets
     {
         // If modifying these scopes, delete your previously saved credentials
         // at ~/.credentials/script-dotnet-quickstart.json
@@ -21,7 +20,7 @@ namespace ConsoleApplication1.GoogleNS
         ScriptService service;
         string scriptId = "MeuP4-pba_GPoGxkx2sttcSfhjS0oyARv";
 
-        public GoogleAPI()
+        public GoogleSheets()
         {
             UserCredential credential;
 

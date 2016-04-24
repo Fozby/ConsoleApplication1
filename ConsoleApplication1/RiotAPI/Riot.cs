@@ -1,18 +1,13 @@
-﻿using ConsoleApplication1.JsonObjects;
-using ConsoleApplication1.JsonObjects.FeaturedGames;
-using ConsoleApplication1.JsonObjects.MatchObjects;
-using ConsoleApplication1.Objects;
+﻿using ConsoleApplication1.RiotAPI.Entities.FeaturedGames;
+using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
+using ConsoleApplication1.RiotAPI.Entities.RecentGames;
 using RestSharp;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
-namespace ConsoleApplication1
+namespace ConsoleApplication1.RiotAPI
 {
     class Riot
     {
@@ -26,8 +21,6 @@ namespace ConsoleApplication1
         private const string MATCH_RESOURCE = "api/lol/" + REGION + "/v2.2/match/{0}?api_key=" + API_KEY;
         private const string CHAMPION_RESOURCE = "api/lol/static-data/" + REGION + "/v1.2/champion?api_key=" + API_KEY;
         private const string FEATURED_GAMES_RESOURCE = "observer-mode/rest/featured?api_key=" + API_KEY;
-
-
 
         private RestClient myRestClient = new RestClient(BASE_URI);
 

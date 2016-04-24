@@ -1,13 +1,11 @@
-﻿using ConsoleApplication1.JsonObjects;
-using ConsoleApplication1.JsonObjects.MatchObjects;
-using ConsoleApplication1.Objects;
+﻿using ConsoleApplication1.GoogleAPI.Entities;
+using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
+using ConsoleApplication1.RiotAPI.Entities.RecentGames;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ConsoleApplication1.GoogleNS
+namespace ConsoleApplication1.GoogleAPI
 {
     class MatchConverter
     {

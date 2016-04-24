@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace ConsoleApplication1.JsonObjects.MatchObjects
+namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
 {
     class Timeline
     {

@@ -1,7 +1,6 @@
 ﻿using RestSharp.Deserializers;
-using System.Xml.Serialization;
 
-namespace ConsoleApplication1.JsonObjects
+namespace ConsoleApplication1.RiotAPI.Entities.RecentGames
 {
     public class Stats
     {

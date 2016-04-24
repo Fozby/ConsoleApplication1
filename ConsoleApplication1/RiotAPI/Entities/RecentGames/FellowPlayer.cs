@@ -1,4 +1,4 @@
-﻿namespace ConsoleApplication1.JsonObjects
+﻿namespace ConsoleApplication1.RiotAPI.Entities.RecentGames
 {
     public class FellowPlayer
     {

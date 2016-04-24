@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using ConsoleApplication1.JsonObjects;
-using ConsoleApplication1.JsonObjects.MatchObjects;
 using Newtonsoft.Json;
-using ConsoleApplication1.GoogleNS;
-using ConsoleApplication1.Objects;
 using System.Threading;
-using ConsoleApplication1.JsonObjects.FeaturedGames;
-using ConsoleApplication1.GoogleNS.Entities;
+using ConsoleApplication1.GoogleAPI;
+using ConsoleApplication1.GoogleAPI.Entities;
+using ConsoleApplication1.RiotAPI;
+using ConsoleApplication1.Database;
+using ConsoleApplication1.RiotAPI.Entities.RecentGames;
+using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
+using ConsoleApplication1.RiotAPI.Entities.FeaturedGames;
 
 namespace ConsoleApplication1
 {
@@ -15,13 +16,14 @@ namespace ConsoleApplication1
     {
         static Riot riot = new Riot();
         static Mongo mongo = new Mongo();
-        static GoogleAPI google = new GoogleAPI();
+        static GoogleSheets google = new GoogleSheets();
         static MatchConverter converter = new MatchConverter();
-
+        
         static void Main(string[] args)
         {
             Console.WriteLine("Starting...");
-            Global.loadChampions(riot.getChampions());
+            StatCollector statCollector = new StatCollector(mongo, riot, google);
+            Global.loadChampions(riot.getChampions()); //TODO store in mongodb to avoid an unnessary call
 
             Console.WriteLine("Loading recent games...");
             List<Game> games = riot.getRecentGamesForAllPlayers();

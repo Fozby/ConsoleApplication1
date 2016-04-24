@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
-using ConsoleApplication1.JsonObjects;
-using ConsoleApplication1.JsonObjects.MatchObjects;
-using ConsoleApplication1.JsonObjects.FeaturedGames;
+using ConsoleApplication1.RiotAPI.Entities.RecentGames;
+using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
+using ConsoleApplication1.RiotAPI.Entities.FeaturedGames;
 
-namespace ConsoleApplication1
+namespace ConsoleApplication1.Database
 {
     class Mongo
     { 

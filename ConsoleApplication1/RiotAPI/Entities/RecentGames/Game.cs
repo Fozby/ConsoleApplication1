@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using System.Collections.Generic;
 
-namespace ConsoleApplication1.JsonObjects
+namespace ConsoleApplication1.RiotAPI.Entities.RecentGames
 {
     public class Game
     {
@@ -23,10 +23,5 @@ namespace ConsoleApplication1.JsonObjects
         public int spell2 { get; set; }
         public string subType { get; set; }
         public int teamId { get; set; }
-
-        public string GetPK()
-        {
-            return $"Game Id [{gameId}]. Summoner Id [{summonerId}]";
-        }
     }
 }

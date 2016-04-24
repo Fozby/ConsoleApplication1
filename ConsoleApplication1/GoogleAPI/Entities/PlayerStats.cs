@@ -1,12 +1,8 @@
-﻿using ConsoleApplication1.GoogleNS;
-using ConsoleApplication1.JsonObjects;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ConsoleApplication1.Objects
+
+namespace ConsoleApplication1.GoogleAPI.Entities
 {
     public class PlayerStats
     {

@@ -1,4 +1,4 @@
-﻿namespace ConsoleApplication1
+﻿namespace ConsoleApplication1.RiotAPI
 {
     public enum RiotHttpStatusCode
     {
