@@ -23,5 +23,21 @@ namespace ConsoleApplication1.RiotAPI.Entities.RecentGames
         public int spell2 { get; set; }
         public string subType { get; set; }
         public int teamId { get; set; }
+
+        public bool hasMatch { get; set; } = false;
+
+        public bool IsSolo()
+        {
+            foreach (FellowPlayer player in fellowPlayers)
+            {
+                if (player.teamId == teamId && //Same team
+                    player.summonerId != summonerId && //Not the current player
+                    Global.players.ContainsKey(player.summonerId)) //Check if any team mate is a friend
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }

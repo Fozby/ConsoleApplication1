@@ -20,5 +20,9 @@ namespace ConsoleApplication1.GoogleAPI.Entities
         public double playerDmgAsPct { get; set; }
         public double dmgTakenAsPct { get; set; }
         public double goldEarnedAsPct { get; set; }
+        public double playerDmgPerMin { get; set; }
+        public double minionDmgPerMin { get; set; }
+        public double minionKillsPerMin { get; set; }
+        public double goldPerMin { get; set; }
     }
 }

@@ -40,26 +40,25 @@ namespace ConsoleApplication1
                 catch (Exception e)
                 {
                     Console.WriteLine($"Exception when querying for featured games. {e}");
-                    throw e;
                 }
 
                 if (featuredGames.Count > 0)
                 {
                     mongo.insertFeaturedGames(featuredGames);
 
-                    foreach (FeaturedGame featuredGame in featuredGames)
-                    {
-                        try
-                        {
-                            MatchDetails match = riot.getMatch(featuredGame.gameId);
-                            mongo.insertMatch(match);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine($"Exception adding match for featured game {featuredGame.gameId}. {e}");
-                            throw e;
-                        }
-                    }
+                    //TODO move this to recent games, featured games will never have a match
+                    //foreach (FeaturedGame featuredGame in featuredGames)
+                    //{
+                    //    try
+                    //    {
+                    //        MatchDetails match = riot.getMatch(featuredGame.gameId);
+                    //        mongo.insertMatch(match);
+                    //    }
+                    //    catch (Exception e)
+                    //    {
+                    //        Console.WriteLine($"Exception adding match for featured game {featuredGame.gameId}. {e}");
+                    //    }
+                    //}
                 }
                 Console.WriteLine($"[{DateTime.Now.ToString()}] Total featured games: {mongo.getFeaturedGameCount()}");
                 Thread.Sleep(300000);
@@ -82,6 +81,50 @@ namespace ConsoleApplication1
 
             int numAdded = mongo.insertGames(recentGames);
             Console.WriteLine($"Collected {numAdded} games. Total Recent Games: {mongo.getAllRecentGames().Count}");
+        }
+
+        public void PrintRatings()
+        {
+            Dictionary<string, string> ratings = new Dictionary<string, string>();
+
+            foreach (long summonerId in Global.players.Keys)
+            {
+                List<RecentGame> games = mongo.getRecentGamesForPlayer(summonerId);
+
+                long numGames = games.Count;
+                long numFeatured = 0;
+
+                long numValidGames = 0;
+
+                foreach (RecentGame game in games)
+                {
+                    long gameId = game.gameId;
+
+                    MatchDetails match = mongo.GetMatch(gameId);
+                    
+                    long start = game.createDate;
+                    long end = start + (match.matchDuration * 1000); //match duration is in seconds, create date is milliseconds
+
+                    if (mongo.isCorrectToCheckIfFeaturedGame(start, end) && game.IsSolo())
+                    {
+                        numValidGames++;
+
+                        if (mongo.isFeaturedGame(gameId))
+                        {
+                            numFeatured++;
+                        }
+                    }
+                }
+
+                double featuredPercent = (double)numFeatured / numValidGames;
+                string rating = $"{numFeatured} / {numValidGames} ({numGames}) {String.Format("{0:0.00}", featuredPercent)}%";
+                ratings.Add(Global.GetPlayerName(summonerId), rating);
+            }
+
+            foreach(KeyValuePair<string, string> kvp in ratings)
+            {
+                Console.WriteLine($"{kvp.Key} : {kvp.Value}");
+            }
         }
 
         public void UploadPlayerStats()
@@ -118,21 +161,33 @@ namespace ConsoleApplication1
             {
                 List<MatchDetails> matches = GetMatchesWithChampion(championId);
 
+                matches.RemoveAll(m => !m.IsValid());
+
                 if (matches.Count > 0)
                 {
                     Dictionary<long, List<GameStats>> playerStats = new Dictionary<long, List<GameStats>>(); //<SummonerID, [List of Recent Games]
 
-                    long totalFriendGames = 0;
                     foreach (int summonerId in Global.players.Keys)
                     {
                         List<RecentGame> recentGames = mongo.GetRecentGamesForChampionAndSummoner(championId, summonerId);
+
+                        recentGames.RemoveAll(g =>
+                        {
+                            long gameId = g.gameId;
+                            MatchDetails match = mongo.GetMatch(gameId);
+
+                            if (match == null || !match.IsValid())
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        });
 
                         if (recentGames.Count > 0)
                         {
                             playerStats.Add(summonerId, BuildGameStats(recentGames));
                         }
-
-                        totalFriendGames += recentGames.Count;
                     }
 
                     ComparativeChampionStats stats = converter.BuildCompetitiveChampionStats(championId, matches, playerStats);
@@ -143,6 +198,7 @@ namespace ConsoleApplication1
 
             statsList = statsList.OrderByDescending(c => c.getNumFriendlyGames()).ToList();
 
+            google.ClearCompetitiveStats();
             foreach (ComparativeChampionStats stats in statsList)
             {
                 google.AddCompetitiveChampionStats(stats);
@@ -159,7 +215,7 @@ namespace ConsoleApplication1
             {
                 MatchDetails match = mongo.GetMatch(featuredGame.gameId);
 
-                if (!matchesWithChampion.Contains(match))
+                if (match!= null && !matchesWithChampion.Contains(match))
                 {
                     matchesWithChampion.Add(match);
                 }
@@ -171,7 +227,7 @@ namespace ConsoleApplication1
             {
                 MatchDetails match = mongo.GetMatch(game.gameId);
 
-                if (!matchesWithChampion.Contains(match))
+                if (match != null &&!matchesWithChampion.Contains(match))
                 {
                     matchesWithChampion.Add(match);
                 }

@@ -59,6 +59,12 @@ namespace ConsoleApplication1.GoogleAPI
             gameStats.dmgTakenAsPct = (double)game.stats.totalDamageTaken / (double)teamStats.dmgTaken;
             gameStats.goldEarnedAsPct = (double)game.stats.goldEarned / (double)teamStats.gold;
 
+            double matchMins = match.matchDuration / 60.0;
+            gameStats.playerDmgPerMin = (double)game.stats.totalDamageDealtToChampions / matchMins;
+            gameStats.minionDmgPerMin = (double)(game.stats.totalDamageDealt - game.stats.totalDamageDealtToChampions) / matchMins;
+            gameStats.minionKillsPerMin = (double)game.stats.minionsKilled / matchMins;
+            gameStats.goldPerMin = (double)game.stats.goldEarned / matchMins;
+
             return gameStats;
         }
 
@@ -82,6 +88,10 @@ namespace ConsoleApplication1.GoogleAPI
             double totalPlayerDmgPct = 0.0;
             double totalDmgTakenPct = 0.0;
             double totalGoldPct = 0.0;
+            double totalPlayerDmgPerMin = 0.0;
+            double totalMinionDmgPerMin = 0.0;
+            double totalMinionKillsPerMin = 0.0;
+            double totalGoldPerMin = 0.0;
 
             foreach (GameStats game in games)
             {
@@ -103,6 +113,10 @@ namespace ConsoleApplication1.GoogleAPI
                 totalPlayerDmgPct += game.playerDmgAsPct;
                 totalDmgTakenPct += game.dmgTakenAsPct;
                 totalGoldPct += game.goldEarnedAsPct;
+                totalPlayerDmgPerMin += game.playerDmgPerMin;
+                totalMinionDmgPerMin += game.minionDmgPerMin;
+                totalMinionKillsPerMin += game.minionKillsPerMin;
+                totalGoldPerMin += game.goldPerMin;
             }
 
             playerStats.win = totalWin / playerStats.numGames;
@@ -118,6 +132,11 @@ namespace ConsoleApplication1.GoogleAPI
             playerStats.avgPlayerDmgPct = totalPlayerDmgPct / playerStats.numGames;
             playerStats.avgDmgTakenPct = totalDmgTakenPct / playerStats.numGames;
             playerStats.avgGoldPct = totalGoldPct / playerStats.numGames;
+            playerStats.avgPlayerDmgPerMin = totalPlayerDmgPerMin / playerStats.numGames;
+            playerStats.avgMinionDmgPerMin = totalMinionDmgPerMin / playerStats.numGames;
+            playerStats.avgMinionKillsPerMin = totalMinionKillsPerMin / playerStats.numGames;
+            playerStats.avgMinionKillsPerMin = totalMinionKillsPerMin / playerStats.numGames;
+            playerStats.avgGoldPerMin = totalGoldPerMin / playerStats.numGames;
 
             return playerStats;
         }
@@ -139,6 +158,7 @@ namespace ConsoleApplication1.GoogleAPI
             long individualMinionDmg = 0;
             long individualPlayerDmg = 0;
             long individualDmgTaken = 0;
+            double matchDurationMins = 0.0;
 
             long teamKills = 0;
             long teamDeaths = 0;
@@ -177,6 +197,8 @@ namespace ConsoleApplication1.GoogleAPI
                 {
                     numWin += 1;
                 }
+
+                matchDurationMins += match.matchDuration / 60.0;
             }
 
             championStats.win = (double) numWin / (double) championStats.numGames;
@@ -192,6 +214,10 @@ namespace ConsoleApplication1.GoogleAPI
             championStats.avgPlayerDmgPct = (double)individualPlayerDmg / (double)teamPlayerDmg;
             championStats.avgDmgTakenPct = (double)individualDmgTaken / (double)teamDmgTaken;
             championStats.avgGoldPct = (double)individualGold / (double)teamGold;
+            championStats.avgPlayerDmgPerMin = (double)individualPlayerDmg / matchDurationMins;
+            championStats.avgMinionDmgPerMin = (double)individualMinionDmg / matchDurationMins;
+            championStats.avgMinionKillsPerMin = (double)individualMinionKills / matchDurationMins;
+            championStats.avgGoldPerMin = (double)individualGold / matchDurationMins;
 
             return championStats;
         }
@@ -222,67 +248,5 @@ namespace ConsoleApplication1.GoogleAPI
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return epoch.AddMilliseconds(unixTime);
         }
-
-        //public Dictionary<string, GameStats> convert(MatchDetails match)
-        //{
-        //    Dictionary<string, GameStats> rows = new Dictionary<string, GameStats>();
-
-        //    long teamKills = 0;
-        //    long teamDeaths = 0;
-        //    long teamAssists = 0;
-        //    long teamPlayerDmg = 0;
-        //    long teamMinionDmg = 0;
-        //    long teamDmgTaken = 0;
-        //    long teamGold = 0;
-        //    long teamMinionKills = 0;
-
-        //    //participantId, summonerName
-        //    Dictionary<int, string> map = match.participantIdentities.ToDictionary(k => k.participantId, v => v.player.summonerName);
-
-        //    foreach (Participant participant in match.participants)
-        //    {
-        //        teamKills += participant.stats.kills;
-        //        teamDeaths += participant.stats.deaths;
-        //        teamAssists += participant.stats.assists;
-        //        teamPlayerDmg += participant.stats.totalDamageDealtToChampions;
-        //        teamMinionDmg += (participant.stats.totalDamageDealt - participant.stats.totalDamageDealtToChampions);
-        //        teamDmgTaken += participant.stats.totalDamageTaken;
-        //        teamGold += participant.stats.goldEarned;
-        //        teamMinionKills += participant.stats.minionsKilled;
-        //    }
-
-        //    foreach (Participant participant in match.participants)
-        //    {
-        //        string player;
-        //        map.TryGetValue(participant.participantId, out player);
-
-        //        GameStats row = new GameStats();
-        //        row.gameId = match.matchId;
-        //        row.player = player;
-        //        row.champion = participant.championId.ToString();
-        //        row.win = participant.stats.winner;
-        //        row.kills = participant.stats.kills;
-        //        row.deaths = participant.stats.deaths;
-        //        row.assists = participant.stats.assists;
-        //        row.killsAsPct = row.kills / teamKills;
-        //        row.deathsAsPct = row.deaths / teamDeaths;
-        //        row.assistsAsPct = row.assists / teamAssists;
-        //        row.killParticipation = (row.kills + row.assists) / teamKills;
-        //        row.minionDmgAsPct = (participant.stats.totalDamageDealt - participant.stats.totalDamageDealtToChampions) / teamMinionDmg;
-        //        row.minionKillsAsPct = participant.stats.minionsKilled / teamMinionKills;
-        //        row.playerDmgAsPct = participant.stats.totalDamageDealtToChampions / teamPlayerDmg;
-        //        row.dmgTakenAsPct = participant.stats.totalDamageTaken / teamDmgTaken;
-        //        row.goldEarnedAsPct = participant.stats.goldEarned / teamGold;
-
-        //        rows.Add(player, row);
-        //    }
-
-        //    return rows;
-        //}
-
-
-
-
-
     }
 }

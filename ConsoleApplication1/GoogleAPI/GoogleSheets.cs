@@ -81,6 +81,12 @@ namespace ConsoleApplication1.GoogleAPI
             callMethod("addCompetitiveChampionStats", _params);
         }
 
+        public void ClearCompetitiveStats()
+        {
+            callMethod("resetCompetitiveChampionStats", new List<Object>());
+
+        }
+
         private void callMethod(string method, List<Object> _params)
         {
             // Create an execution request object.

@@ -64,5 +64,18 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
 
             return -1;
         }
+
+        public Boolean IsValid()
+        {
+            foreach(Participant participant in participants)
+            {
+                if (participant.stats.totalDamageDealt == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

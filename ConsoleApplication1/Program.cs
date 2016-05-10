@@ -6,6 +6,7 @@ using ConsoleApplication1.RiotAPI.Entities.RecentGames;
 using System.Collections.Generic;
 using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
 using ConsoleApplication1.RiotAPI.Entities.FeaturedGames;
+using Newtonsoft.Json;
 
 namespace ConsoleApplication1
 {
@@ -24,9 +25,10 @@ namespace ConsoleApplication1
 
             Console.WriteLine("Adding recent games...");
             //collector.CollectRecentGames();
-            collector.UploadCompetitiveChampionStats();
 
             Cleanup();
+
+            collector.PrintRatings();
 
             while (true)
             {
@@ -49,6 +51,42 @@ namespace ConsoleApplication1
                 {
                     collector.UploadCompetitiveChampionStats();
                 }
+                else if (input == "short")
+                {
+                    List<RecentGame> shortGames = mongo.GetShortGames();
+                    Dictionary<string, int> foo = new Dictionary<string, int>();
+
+                    foreach (RecentGame game in shortGames)
+                    {
+                        long summId = game.summonerId;
+                        string name = Global.GetPlayerName(summId);
+
+                        if (foo.ContainsKey(name))
+                        {
+                            int count;
+                            foo.TryGetValue(name, out count);
+                            count++;
+
+                            foo.Remove(name);
+                            foo.Add(name, count);
+                        }
+                        else
+                        {
+                            foo.Add(name, 1);
+                        }
+
+                        Console.WriteLine(JsonConvert.SerializeObject(game, Formatting.Indented));
+                    }
+
+                    foreach (string name in foo.Keys)
+                    {
+                        int count;
+                        foo.TryGetValue(name, out count);
+                        Console.WriteLine($"{name} : {count}");
+                    }
+
+                    Console.WriteLine($"{mongo.GetShortGames().Count}");
+                }
             }
         }
 
@@ -60,7 +98,9 @@ namespace ConsoleApplication1
 
         static void CleanupRecentGames()
         {
-            List<RecentGame> recentGames = mongo.getAllRecentGames();
+            List<RecentGame> recentGames = mongo.GetUnflaggedRecentGames();
+
+            Console.WriteLine($"Found {recentGames.Count} unflagged recent games");
 
             foreach (RecentGame recentGame in recentGames)
             {
@@ -76,20 +116,27 @@ namespace ConsoleApplication1
                         if (newMatch != null)
                         {
                             mongo.insertMatch(newMatch);
+                            mongo.FlagRecentGame(recentGame.gameId);
                         }
                     }
                     catch (DataNotFoundException e)
                     {
-                        Console.WriteLine($"No internal or riot record for {recentGame.gameId}. Deleting game");
+                        Console.WriteLine($"No internal or riot record for {recentGame.gameId}. Deleting recent game");
                         mongo.DeleteRecentGame(recentGame.gameId);
-                    }
+                    } 
+                }
+                else
+                {
+                    mongo.FlagRecentGame(recentGame.gameId);
                 }
             }
         }
 
         static void CleanupFeaturedGames()
         {
-            List<FeaturedGame> featuredGames = mongo.GetAllFeaturedGames();
+            List<FeaturedGame> featuredGames = mongo.GetUnflaggedFeaturedGames();
+
+            Console.WriteLine($"Found {featuredGames.Count} unflagged featured games");
 
             foreach (FeaturedGame featuredGame in featuredGames)
             {
@@ -105,13 +152,18 @@ namespace ConsoleApplication1
                         if (newMatch != null)
                         {
                             mongo.insertMatch(newMatch);
+                            mongo.FlagFeaturedGame(featuredGame.gameId);
                         }
                     }
                     catch (DataNotFoundException e)
                     {
-                        Console.WriteLine($"No internal or riot record for {featuredGame.gameId}. Deleting game");
+                        Console.WriteLine($"No internal or riot record for {featuredGame.gameId}. Match probably not uploaded yet.");
                         mongo.deleteFeaturedGame(featuredGame.gameId);
                     }
+                }
+                else
+                {
+                    mongo.FlagFeaturedGame(featuredGame.gameId);
                 }
             }
         }

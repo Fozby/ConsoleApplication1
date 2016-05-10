@@ -74,7 +74,7 @@ namespace ConsoleApplication1.Database
                 }
                 else
                 {
-                    Console.WriteLine("Unhandled exception inserting Game with GameID: [" + game.gameId + "]." + e);
+                    Console.WriteLine($"Unhandled exception inserting Game with GameID: [{game.gameId}]. {e}");
                     throw e;
                 }
             }
@@ -86,6 +86,15 @@ namespace ConsoleApplication1.Database
         {
             var filter = Builders<RecentGame>.Filter.Eq("gameId", gameId);
             gameCollection.DeleteOne(filter);
+        }
+
+        public List<RecentGame> GetShortGames()
+        {
+            var filter = Builders<RecentGame>.Filter.Lt(g => g.stats.timePlayed, 900);
+            var sort = Builders<RecentGame>.Sort.Ascending("championId").Ascending("summonerId").Ascending("gameId");
+
+            var games = gameCollection.Find(filter).Sort(sort).ToList();
+            return games;
         }
 
         public int insertGames(List<RecentGame> games)
@@ -137,6 +146,32 @@ namespace ConsoleApplication1.Database
             return gameCollection.Find(filter).ToList();
         }
 
+        public List<RecentGame> GetFlaggedRecentGames()
+        {
+            var filter = Builders<RecentGame>.Filter.Eq("hasMatch", true);
+
+            var games = gameCollection.Find(filter).ToList();
+            return games;
+        }
+
+        public List<RecentGame> GetUnflaggedRecentGames()
+        {
+            var filter = Builders<RecentGame>.Filter.Ne("hasMatch", true);
+
+            var games = gameCollection.Find(filter).ToList();
+            return games;
+        }
+
+        public void FlagRecentGame(long gameId)
+        {
+            var filter = Builders<RecentGame>.Filter.Eq("gameId", gameId);
+            var update = Builders<RecentGame>.Update.Set("hasMatch", true);
+
+            List<RecentGame> games = gameCollection.Find(filter).ToList();
+
+            UpdateResult result = gameCollection.UpdateMany(filter, update);
+        }
+
         public void insertMatch(MatchDetails match)
         {
             try
@@ -152,7 +187,7 @@ namespace ConsoleApplication1.Database
                 }
                 else
                 {
-                    Console.WriteLine("Unhandled exception inserting Match with matchId: [" + match.matchId + "]." + e);
+                    Console.WriteLine($"Unhandled exception inserting Match with matchId: [{ match.matchId}]. {e}");
                 }
             }
         }
@@ -198,7 +233,7 @@ namespace ConsoleApplication1.Database
                 }
                 else
                 {
-                    Console.WriteLine("Unhandled exception inserting Featured Game with gameId: [" + game.gameId + "]." + e);
+                    Console.WriteLine($"Unhandled exception inserting Featured Game with gameId: [{game.gameId}]. {e}");
                     throw e;
                 }
             }
@@ -212,20 +247,49 @@ namespace ConsoleApplication1.Database
         public List<FeaturedGame> GetFeaturedGamesForChampion(int championId)
         {
             var builder = Builders<FeaturedGame>.Filter;
-            var filter = builder.ElemMatch(g => g.participants, g => g.championId == championId);
+            var filter = builder.ElemMatch(g => g.participants, g => g.championId == championId) &
+                            builder.Eq("hasMatch", true);
 
             return featuredGameCollection.Find(filter).ToList();
-        }
-
-        public List<FeaturedGame> GetAllFeaturedGames()
-        {
-            return featuredGameCollection.Find(Builders<FeaturedGame>.Filter.Empty).ToList();
         }
 
         public void deleteFeaturedGame(long gameId)
         {
             var filter = Builders<FeaturedGame>.Filter.Eq("gameId", gameId);
             featuredGameCollection.DeleteOne(filter);
+        }
+
+        public void FlagFeaturedGame(long gameId)
+        {
+            var filter = Builders<FeaturedGame>.Filter.Eq("gameId", gameId);
+            var update = Builders<FeaturedGame>.Update.Set("hasMatch", true);
+
+            UpdateResult result = featuredGameCollection.UpdateMany(filter, update);
+        }
+
+        public bool isCorrectToCheckIfFeaturedGame(long gameStart, long gameEnd)
+        {
+            var builder = Builders<FeaturedGame>.Filter;
+            var filter = builder.Gt(g => g.gameStartTime, gameStart) 
+                            & builder.Lt(g => g.gameStartTime, gameEnd);
+
+            return featuredGameCollection.Find(filter).ToList().Count > 0;
+        }
+
+        public bool isFeaturedGame(long gameId)
+        {
+            var filter = Builders<FeaturedGame>.Filter.Eq("gameId", gameId);
+
+            return featuredGameCollection.Find(filter).ToList().Count > 0;
+        }
+
+        public List<FeaturedGame> GetUnflaggedFeaturedGames()
+        {
+            var builder = Builders<FeaturedGame>.Filter;
+            var filter = builder.Ne("hasMatch", true);
+
+            var games = featuredGameCollection.Find(filter).ToList();
+            return games;
         }
     }
 }

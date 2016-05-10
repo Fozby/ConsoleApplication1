@@ -16,6 +16,10 @@
         public double avgMinionDmgPct { get; set; }
         public double avgPlayerDmgPct { get; set; }
         public double avgDmgTakenPct { get; set; }
-        public double avgGoldPct { get; set; }     
+        public double avgGoldPct { get; set; }
+        public double avgPlayerDmgPerMin { get; set; }
+        public double avgMinionDmgPerMin { get; set; }
+        public double avgMinionKillsPerMin { get; set; }
+        public double avgGoldPerMin { get; set; }
     }
 }
