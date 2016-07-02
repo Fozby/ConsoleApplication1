@@ -1,0 +1,8 @@
+﻿TODO:
+
+- Google API call is timing out when we send all champion data (FIXED)
+- Dynamic thread waiting instead of every 1.3s
+- Google sheet visuals for scoring systems
+- Another sheet for player stats, categorised somehow by tank/adc/apc/etc
+- Cache player / champion stats, shouldnt need to recalculate stats if #games hasent changed
+- Add bold to titles

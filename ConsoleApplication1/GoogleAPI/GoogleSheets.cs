@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ConsoleApplication1.GoogleAPI
 {
@@ -78,7 +79,7 @@ namespace ConsoleApplication1.GoogleAPI
             List<object> _params = new List<object>();
             _params.Add(stats);
 
-            callMethod("addCompetitiveChampionStats2", _params);
+            callMethod("addCompetitiveChampionStats", _params);
         }
 
         public void ClearCompetitiveStats()
@@ -104,7 +105,12 @@ namespace ConsoleApplication1.GoogleAPI
             try
             {
                 // Make the API request.
+                Console.WriteLine($"Starting at {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
+
                 Operation op = runReq.Execute();
+
+                Console.WriteLine($"Finished at {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
+
 
                 if (op.Error != null)
                 {
@@ -154,6 +160,10 @@ namespace ConsoleApplication1.GoogleAPI
                 // The API encountered a problem before the script
                 // started executing.
                 Console.WriteLine("Error calling API:\n{0}", e);
+            }
+            catch (TaskCanceledException e)
+            {
+                Console.WriteLine($"Error at {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
             }
         }
     }
