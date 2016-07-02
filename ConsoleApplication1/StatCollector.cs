@@ -28,9 +28,9 @@ namespace ConsoleApplication1
 
         public void CollectFeaturedGames()
         {
-            Console.WriteLine("Starting 5 minute timer to query featured games...");
-            while (true)
-            {
+            Console.WriteLine("Querying featured games...");
+            //while (true)
+            //{
                 List<FeaturedGame> featuredGames = new List<FeaturedGame>();
 
                 try
@@ -45,24 +45,10 @@ namespace ConsoleApplication1
                 if (featuredGames.Count > 0)
                 {
                     mongo.insertFeaturedGames(featuredGames);
-
-                    //TODO move this to recent games, featured games will never have a match
-                    //foreach (FeaturedGame featuredGame in featuredGames)
-                    //{
-                    //    try
-                    //    {
-                    //        MatchDetails match = riot.getMatch(featuredGame.gameId);
-                    //        mongo.insertMatch(match);
-                    //    }
-                    //    catch (Exception e)
-                    //    {
-                    //        Console.WriteLine($"Exception adding match for featured game {featuredGame.gameId}. {e}");
-                    //    }
-                    //}
                 }
                 Console.WriteLine($"[{DateTime.Now.ToString()}] Total featured games: {mongo.getFeaturedGameCount()}");
-                Thread.Sleep(300000);
-            }
+            //    Thread.Sleep(300000);
+            //}
         }
 
         public void CollectRecentGames()
@@ -105,7 +91,7 @@ namespace ConsoleApplication1
                     long start = game.createDate;
                     long end = start + (match.matchDuration * 1000); //match duration is in seconds, create date is milliseconds
 
-                    if (mongo.isCorrectToCheckIfFeaturedGame(start, end) && game.IsSolo())
+                    if (mongo.isCorrectToCheckIfFeaturedGame(start, end))// && game.IsSolo())
                     {
                         numValidGames++;
 
@@ -129,6 +115,7 @@ namespace ConsoleApplication1
 
         public void UploadPlayerStats()
         {
+            google.ClearPlayerStats();
             foreach (long summonerId in Global.players.Keys)
             {
                 List<RecentGame> statGames = mongo.getRecentGamesForPlayer(summonerId);

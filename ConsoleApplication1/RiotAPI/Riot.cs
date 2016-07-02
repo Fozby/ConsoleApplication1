@@ -84,7 +84,7 @@ namespace ConsoleApplication1.RiotAPI
 
         private T RiotApiRequest<T>(string resource) where T : new()
         {
-            Thread.Sleep(1100);
+            Thread.Sleep(1300);
 
             RestRequest request = new RestRequest(resource, Method.GET);
             IRestResponse<T> response = myRestClient.Execute<T>(request);

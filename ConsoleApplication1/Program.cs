@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
 using ConsoleApplication1.RiotAPI.Entities.FeaturedGames;
 using Newtonsoft.Json;
+using System.Threading;
+using System.Timers;
 
 namespace ConsoleApplication1
 {
@@ -16,78 +18,131 @@ namespace ConsoleApplication1
         static Mongo mongo = new Mongo();
         static GoogleSheets google = new GoogleSheets();
         static MatchConverter converter = new MatchConverter();
-        
+        static StatCollector collector = new StatCollector(mongo, riot, google);
+
         static void Main(string[] args)
         {
-            Console.WriteLine("Starting...");
-            StatCollector collector = new StatCollector(mongo, riot, google);
+            //Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId}: Starting...");
             Global.loadChampions(riot.getChampions()); //TODO store in mongodb to avoid an unnessary call
+            //collector.UploadChampionStats();
 
-            Console.WriteLine("Adding recent games...");
+
+
+            //Console.WriteLine("Adding recent games...");
             //collector.CollectRecentGames();
 
+            //Cleanup();
+
+            double ONE_HOUR_TIMER = 60 * 60 * 1000;
+            double FIVE_MINUTE_TIMER = 5 * 60 * 1000;
+            double FIVE_HOUR_TIMER = 5 * 60 * 60 * 1000;
+
+            System.Timers.Timer recentGamesTimer = new System.Timers.Timer();
+            recentGamesTimer.Elapsed += new ElapsedEventHandler(CollectRecentGames);
+            recentGamesTimer.Interval = ONE_HOUR_TIMER;
+            recentGamesTimer.Enabled = true;
+
+            System.Timers.Timer featuredGamesTimer = new System.Timers.Timer();
+            featuredGamesTimer.Elapsed += new ElapsedEventHandler(CollectFeaturedGames);
+            featuredGamesTimer.Interval = FIVE_MINUTE_TIMER;
+            featuredGamesTimer.Enabled = true;
+
+            System.Timers.Timer uploadTimer = new System.Timers.Timer();
+            uploadTimer.Elapsed += new ElapsedEventHandler(UploadData);
+            uploadTimer.Interval = FIVE_HOUR_TIMER;
+            uploadTimer.Enabled = true;
+
+            collector.CollectRecentGames();
+            collector.CollectFeaturedGames();
             Cleanup();
 
+            collector.UploadPlayerStats();
             collector.PrintRatings();
+            collector.UploadCompetitiveChampionStats();
 
-            while (true)
-            {
-                Console.WriteLine("Insert command");
-                string input = Console.ReadLine();
+            recentGamesTimer.Start();
+            featuredGamesTimer.Start();
+            uploadTimer.Start();
+            Console.ReadLine();
+   
 
-                if (input == "featured")
-                {
-                    collector.CollectFeaturedGames();
-                }
-                else if (input == "player")
-                {
-                    collector.UploadPlayerStats();
-                }
-                else if (input == "champion")
-                {
-                    collector.UploadChampionStats();
-                }
-                else if (input == "competitive")
-                {
-                    collector.UploadCompetitiveChampionStats();
-                }
-                else if (input == "short")
-                {
-                    List<RecentGame> shortGames = mongo.GetShortGames();
-                    Dictionary<string, int> foo = new Dictionary<string, int>();
+            //while (true)
+            //{
+            //    Console.WriteLine("Insert command");
+            //    string input = Console.ReadLine();
 
-                    foreach (RecentGame game in shortGames)
-                    {
-                        long summId = game.summonerId;
-                        string name = Global.GetPlayerName(summId);
+            //    if (input == "featured")
+            //    {
+            //        collector.CollectFeaturedGames();
+            //    }
+            //    else if (input == "player")
+            //    {
+            //        collector.UploadPlayerStats();
+            //    }
+            //    else if (input == "champion")
+            //    {
+            //        collector.UploadChampionStats();
+            //    }
+            //    else if (input == "competitive")
+            //    {
+            //        collector.UploadCompetitiveChampionStats();
+            //    }
+            //    else if (input == "short")
+            //    {
+            //        List<RecentGame> shortGames = mongo.GetShortGames();
+            //        Dictionary<string, int> foo = new Dictionary<string, int>();
 
-                        if (foo.ContainsKey(name))
-                        {
-                            int count;
-                            foo.TryGetValue(name, out count);
-                            count++;
+            //        foreach (RecentGame game in shortGames)
+            //        {
+            //            long summId = game.summonerId;
+            //            string name = Global.GetPlayerName(summId);
 
-                            foo.Remove(name);
-                            foo.Add(name, count);
-                        }
-                        else
-                        {
-                            foo.Add(name, 1);
-                        }
+            //            if (foo.ContainsKey(name))
+            //            {
+            //                int count;
+            //                foo.TryGetValue(name, out count);
+            //                count++;
 
-                        Console.WriteLine(JsonConvert.SerializeObject(game, Formatting.Indented));
-                    }
+            //                foo.Remove(name);
+            //                foo.Add(name, count);
+            //            }
+            //            else
+            //            {
+            //                foo.Add(name, 1);
+            //            }
 
-                    foreach (string name in foo.Keys)
-                    {
-                        int count;
-                        foo.TryGetValue(name, out count);
-                        Console.WriteLine($"{name} : {count}");
-                    }
+            //            Console.WriteLine(JsonConvert.SerializeObject(game, Formatting.Indented));
+            //        }
 
-                    Console.WriteLine($"{mongo.GetShortGames().Count}");
-                }
-            }
+            //        foreach (string name in foo.Keys)
+            //        {
+            //            int count;
+            //            foo.TryGetValue(name, out count);
+            //            Console.WriteLine($"{name} : {count}");
+            //        }
+
+            //        Console.WriteLine($"{mongo.GetShortGames().Count}");
+            //    }
+            //}
+        }
+
+        private static void CollectRecentGames(object source, ElapsedEventArgs e)
+        {
+            Console.WriteLine($"Timer command to read recent games");
+            Cleanup();
+            collector.CollectRecentGames();
+        }
+
+        private static void CollectFeaturedGames(object source, ElapsedEventArgs e)
+        {
+            Console.WriteLine($"Timer command to read featured games");
+            collector.CollectFeaturedGames();
+        }
+
+        private static void UploadData(object source, ElapsedEventArgs e)
+        {
+            Console.WriteLine($"Timer command to upload games");
+            collector.UploadCompetitiveChampionStats();
         }
 
         static void Cleanup()
@@ -122,7 +177,7 @@ namespace ConsoleApplication1
                     catch (DataNotFoundException e)
                     {
                         Console.WriteLine($"No internal or riot record for {recentGame.gameId}. Deleting recent game");
-                        mongo.DeleteRecentGame(recentGame.gameId);
+                        //mongo.DeleteRecentGame(recentGame.gameId);
                     } 
                 }
                 else
@@ -158,7 +213,7 @@ namespace ConsoleApplication1
                     catch (DataNotFoundException e)
                     {
                         Console.WriteLine($"No internal or riot record for {featuredGame.gameId}. Match probably not uploaded yet.");
-                        mongo.deleteFeaturedGame(featuredGame.gameId);
+                        //mongo.deleteFeaturedGame(featuredGame.gameId);
                     }
                 }
                 else

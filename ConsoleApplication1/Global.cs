@@ -19,6 +19,11 @@ namespace ConsoleApplication1
         private const long SUMMONER_ID_RISHMAU = 6160582;
         public const long SUMMONER_ID_IGAR = 577854;
         public const long SUMMONER_ID_LOVELY = 1190141;
+        public const long SUMMONER_ID_BUBULA = 921064;
+        public const long SUMMONER_ID_REINGAR = 2691613;
+        public const long SUMMONER_ID_LA_SQUID = 295097;
+        public const long SUMMONER_ID_MEWBULA = 5934357;
+     
 
         public static Dictionary<int, string> champions = new Dictionary<int, string>();
   
@@ -36,7 +41,10 @@ namespace ConsoleApplication1
             {SUMMONER_ID_RISHMAU, "Rishmau" },
             {SUMMONER_ID_RISHVAS, "Rishvas" },
             {SUMMONER_ID_IGAR, "Igar" },
-            {SUMMONER_ID_LOVELY, "Lovely" }
+            {SUMMONER_ID_LOVELY, "Lovely" },
+            {SUMMONER_ID_REINGAR, "Reingar" },
+            {SUMMONER_ID_LA_SQUID, "La Squid" },
+            {SUMMONER_ID_MEWBULA, "Mewbula" }
         };
 
         public static void loadChampions(ChampionList championList)

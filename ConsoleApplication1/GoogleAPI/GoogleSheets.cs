@@ -84,7 +84,11 @@ namespace ConsoleApplication1.GoogleAPI
         public void ClearCompetitiveStats()
         {
             callMethod("resetCompetitiveChampionStats", new List<Object>());
+        }
 
+        public void ClearPlayerStats()
+        {
+            callMethod("resetPlayerStats", new List<Object>());
         }
 
         private void callMethod(string method, List<Object> _params)
@@ -151,6 +155,6 @@ namespace ConsoleApplication1.GoogleAPI
                 // started executing.
                 Console.WriteLine("Error calling API:\n{0}", e);
             }
-        } 
+        }
     }
 }
