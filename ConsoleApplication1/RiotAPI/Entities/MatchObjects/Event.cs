@@ -2,7 +2,7 @@
 
 namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
 {
-    class Event
+    public class Event
     {
         public string ascendedType { get; set; }
         public List<int> assistingParticipantIds { get; set; }

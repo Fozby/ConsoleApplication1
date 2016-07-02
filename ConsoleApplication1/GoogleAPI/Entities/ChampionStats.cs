@@ -1,25 +1,41 @@
-﻿namespace ConsoleApplication1.GoogleAPI.Entities
+﻿using ConsoleApplication1.GoogleAPI.Entities.Timeline;
+using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
+using System.Collections.Generic;
+
+namespace ConsoleApplication1.GoogleAPI.Entities
 {
     class ChampionStats
     {
-        public string champion { get; set; }
+        public string championName { get; }
+
         public int numGames { get; set; }
         public double win { get; set; }
-        public double avgKills { get; set; }
-        public double avgDeaths { get; set; }
-        public double avgAssists { get; set; }
-        public double avgKillParticipation { get; set; }
-        public double avgKillsPct { get; set; }
-        public double avgDeathsPct { get; set; }
-        public double avgAssistsPct { get; set; }
-        public double avgMinionKillsPct { get; set; }
-        public double avgMinionDmgPct { get; set; }
-        public double avgPlayerDmgPct { get; set; }
-        public double avgDmgTakenPct { get; set; }
-        public double avgGoldPct { get; set; }
-        public double avgPlayerDmgPerMin { get; set; }
-        public double avgMinionDmgPerMin { get; set; }
-        public double avgMinionKillsPerMin { get; set; }
-        public double avgGoldPerMin { get; set; }
+        public double kills { get; set; }
+        public double deaths { get; set; }
+        public double assists { get; set; }
+
+        public double goldPerMin { get; set; }
+        public double creepsPerMin { get; set; }
+        public double killParticipation { get; set; }
+        public double pctGold { get; set; }
+        public double pctCreepDamage { get; set; }
+        public double pctPlayerDamage { get; set; }
+        public double pctDamageTaken { get; set; }
+        public double pctKills { get; set; }
+        public double pctDeaths { get; set; }
+        public double pctAssists { get; set; }
+
+        public double healing { get; set; }
+        public double physPlayerDamage { get; set; }
+        public double physCreepDamage { get; set; }
+        public double crowdControl { get; set; }
+
+        public TimelineStats goldStats { get; set; }
+        public TimelineStats creepStats { get; set; }
+
+        public ChampionStats(string championName)
+        {
+            this.championName = championName;
+        }   
     }
 }

@@ -1,7 +1,7 @@
 ﻿
 namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
 {
-    class ParticipantTimelineData
+    public class ParticipantTimelineData
     {
         public double tenToTwenty { get; set; }
         public double thirtyToEnd { get; set; }

@@ -2,7 +2,7 @@
 
 namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
 {
-    class Participant
+    public class Participant
     {
         public int championId { get; set; }
         public string highestAchievedSeasonTier { get; set; }

@@ -1,4 +1,5 @@
 ﻿using ConsoleApplication1.RiotAPI.Entities.RecentGames;
+using System;
 using System.Collections.Generic;
 
 
@@ -71,6 +72,11 @@ namespace ConsoleApplication1
             players.TryGetValue(summonerId, out playerName);
 
             return playerName;
+        }
+
+        public static void Print(object obj)
+        {
+            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented));
         }
 
     }

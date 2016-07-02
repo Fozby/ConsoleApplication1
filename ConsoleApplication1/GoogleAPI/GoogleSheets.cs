@@ -49,15 +49,7 @@ namespace ConsoleApplication1.GoogleAPI
             });
         }
 
-        public void AddRecentGame(GameStats row)
-        {
-            List<object> _params = new List<object>();
-            _params.Add(row);
-
-            callMethod("addGame", _params);
-        }
-
-        public void AddPlayerStats(PlayerStats stats)
+        public void AddPlayerStats(PlayerChampionStats stats)
         {
             List<object> _params = new List<object>();
             _params.Add(stats);
@@ -73,12 +65,20 @@ namespace ConsoleApplication1.GoogleAPI
             callMethod("addFeaturedStats", _params);
         }
 
-        public void AddCompetitiveChampionStats(ComparativeChampionStats stats)
+        public void AddCompetitiveChampionStats(CompetitiveStats stats)
         {
             List<object> _params = new List<object>();
             _params.Add(stats);
 
             callMethod("addCompetitiveChampionStats", _params);
+        }
+
+        public void AddCompetitiveChampionStats2(List<CompetitiveStats> stats)
+        {
+            List<object> _params = new List<object>();
+            _params.Add(stats);
+
+            callMethod("addCompetitiveChampionStats2", _params);
         }
 
         public void ClearCompetitiveStats()

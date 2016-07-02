@@ -1,7 +1,7 @@
 ﻿
 namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
 {
-    class ParticipantFrame
+    public class ParticipantFrame
     {
         public string currentGold { get; set; }
         public string dominionScore { get; set; }

@@ -1,10 +1,12 @@
-﻿using MongoDB.Bson;
+﻿using ConsoleApplication1.GoogleAPI.DataObjects;
+using ConsoleApplication1.GoogleAPI.Entities;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 
 namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
 {
-    class MatchDetails
+    public class MatchDetails
     {
         public ObjectId Id { get; set; }
 
@@ -23,6 +25,48 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
         public string season { get; set; }
         public List<Team> teams { get; set; }
         public Timeline timeline { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            var item = obj as MatchDetails;
+
+            if (item == null)
+            {
+                return false;
+            }
+
+            return this.matchId.Equals(item.matchId);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.matchId.GetHashCode();
+        }
+
+        public Data getChampionData(int championId)
+        {
+            ParticipantStats pStats = GetStatsForChampion(championId);
+
+            return new Data(pStats);
+        }
+
+        public Data getTeamData(int championId)
+        {
+            int teamId = GetTeamIdForChampion(championId);
+
+            List<ParticipantStats> teamStats = participants
+                .FindAll(p => p.teamId == teamId)
+                .ConvertAll(p => p.stats);
+
+            Data teamData = new Data();
+
+            foreach (ParticipantStats stats in teamStats)
+            {
+                teamData = teamData.add(new Data(stats));
+            }
+
+            return teamData;
+        }
 
         public int GetTeamIdForChampion(int championId)
         {
@@ -45,6 +89,20 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
                 if (participant.championId == championId)
                 {
                     return participant.stats;
+                }
+            }
+
+            //TODO custom exceptions 
+            throw new ArgumentException($"championId not found in match: {matchId}");
+        }
+
+        public ParticipantTimeline GetTimelineForChampion(int championId)
+        {
+            foreach (Participant participant in participants)
+            {
+                if (participant.championId == championId)
+                {
+                    return participant.timeline;
                 }
             }
 

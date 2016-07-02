@@ -111,6 +111,13 @@ namespace ConsoleApplication1.Database
             return numAdded;
         }
 
+        public RecentGame GetRecentGame(long gameId)
+        {
+            var filter = Builders<RecentGame>.Filter.Eq("gameId", gameId);
+
+            return gameCollection.Find(filter).First();
+        }
+
         public List<RecentGame> getAllRecentGames()
         {
             var sort = Builders<RecentGame>.Sort.Ascending("championId").Ascending("summonerId").Ascending("gameId");

@@ -2,7 +2,7 @@
 
 namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
 {
-    class Team
+    public class Team
     {
         public List<BannedChampion> bans { get; set; }
         public int baronKills { get; set; }

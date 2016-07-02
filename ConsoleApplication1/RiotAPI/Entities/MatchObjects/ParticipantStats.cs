@@ -1,7 +1,7 @@
 ﻿
 namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
 {
-    class ParticipantStats
+    public class ParticipantStats
     {
         public long assists { get; set; }
         public long champLevel { get; set; }

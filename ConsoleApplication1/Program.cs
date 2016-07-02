@@ -9,6 +9,8 @@ using ConsoleApplication1.RiotAPI.Entities.FeaturedGames;
 using Newtonsoft.Json;
 using System.Threading;
 using System.Timers;
+using ConsoleApplication1.GoogleAPI.Entities;
+using ConsoleApplication1.GoogleAPI.DataObjects;
 
 namespace ConsoleApplication1
 {
@@ -17,22 +19,25 @@ namespace ConsoleApplication1
         static Riot riot = new Riot();
         static Mongo mongo = new Mongo();
         static GoogleSheets google = new GoogleSheets();
-        static MatchConverter converter = new MatchConverter();
+        static CompetitiveStatsBuilder converter = new CompetitiveStatsBuilder();
         static StatCollector collector = new StatCollector(mongo, riot, google);
 
         static void Main(string[] args)
         {
-            //Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId}: Starting...");
             Global.loadChampions(riot.getChampions()); //TODO store in mongodb to avoid an unnessary call
             //collector.UploadChampionStats();
 
+            //ComparativeChampionStats stats = collector.BuildComparativeStats(25);
 
+            //collector.UploadCompetitiveChampionStats();
 
             //Console.WriteLine("Adding recent games...");
             //collector.CollectRecentGames();
 
             //Cleanup();
 
+            //Console.ReadLine();
+            //return;
             double ONE_HOUR_TIMER = 60 * 60 * 1000;
             double FIVE_MINUTE_TIMER = 5 * 60 * 1000;
             double FIVE_HOUR_TIMER = 5 * 60 * 60 * 1000;
@@ -56,8 +61,8 @@ namespace ConsoleApplication1
             collector.CollectFeaturedGames();
             Cleanup();
 
-            collector.UploadPlayerStats();
-            collector.PrintRatings();
+            //collector.UploadPlayerStats();
+            //collector.PrintRatings();
             collector.UploadCompetitiveChampionStats();
 
             recentGamesTimer.Start();
@@ -142,7 +147,7 @@ namespace ConsoleApplication1
         private static void UploadData(object source, ElapsedEventArgs e)
         {
             Console.WriteLine($"Timer command to upload games");
-            collector.UploadCompetitiveChampionStats();
+            //collector.UploadCompetitiveChampionStats();
         }
 
         static void Cleanup()

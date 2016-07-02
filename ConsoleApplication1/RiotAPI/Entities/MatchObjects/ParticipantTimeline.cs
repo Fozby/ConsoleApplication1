@@ -1,6 +1,6 @@
 ﻿namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
 {
-    class ParticipantTimeline
+    public class ParticipantTimeline
     {
         public ParticipantTimelineData ancientGolemAssistsPerMinCounts { get; set; }
         public ParticipantTimelineData ancientGolemKillsPerMinCounts { get; set; }

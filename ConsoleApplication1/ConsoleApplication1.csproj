@@ -104,11 +104,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Global.cs" />
-    <Compile Include="GoogleAPI\Entities\ComparativeChampionStats.cs" />
+    <Compile Include="Objects\MatchCollection.cs" />
+    <Compile Include="GoogleAPI\Entities\Timeline\TimelineStat.cs" />
+    <Compile Include="GoogleAPI\Entities\Timeline\TimelineStats.cs" />
+    <Compile Include="GoogleAPI\Entities\CompetitiveStats.cs" />
     <Compile Include="GoogleAPI\Entities\ChampionStats.cs" />
+    <Compile Include="GoogleAPI\Entities\Timeline\TimelineStatsBuilder.cs" />
     <Compile Include="GoogleAPI\GoogleSheets.cs" />
-    <Compile Include="GoogleAPI\Entities\GameStats.cs" />
-    <Compile Include="GoogleAPI\MatchConverter.cs" />
+    <Compile Include="GoogleAPI\CompetitiveStatsBuilder.cs" />
+    <Compile Include="Objects\Data.cs" />
     <Compile Include="RiotAPI\DataNotFoundException.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\ChampionDto.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\ChampionList.cs" />
@@ -131,8 +135,7 @@
     <Compile Include="RiotAPI\Entities\MatchObjects\ParticipantIdentity .cs" />
     <Compile Include="RiotAPI\Entities\MatchObjects\Timeline.cs" />
     <Compile Include="RiotAPI\Entities\MatchObjects\ParticipantTimelineData.cs" />
-    <Compile Include="GoogleAPI\Entities\PlayerStats.cs" />
-    <Compile Include="GoogleAPI\Entities\TeamStats.cs" />
+    <Compile Include="GoogleAPI\Entities\PlayerChampionStats.cs" />
     <Compile Include="RiotAPI\Riot.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\FellowPlayer.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\RecentGame.cs" />

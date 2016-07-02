@@ -1,5 +1,6 @@
 ﻿using ConsoleApplication1.Database;
 using ConsoleApplication1.GoogleAPI;
+using ConsoleApplication1.GoogleAPI.DataObjects;
 using ConsoleApplication1.GoogleAPI.Entities;
 using ConsoleApplication1.RiotAPI;
 using ConsoleApplication1.RiotAPI.Entities.FeaturedGames;
@@ -17,7 +18,7 @@ namespace ConsoleApplication1
         private Riot riot;
         private Mongo mongo;
         private GoogleSheets google;
-        private MatchConverter converter = new MatchConverter();
+        private CompetitiveStatsBuilder converter = new CompetitiveStatsBuilder();
 
         public StatCollector(Mongo mongo, Riot riot, GoogleSheets google)
         {
@@ -113,87 +114,54 @@ namespace ConsoleApplication1
             }
         }
 
-        public void UploadPlayerStats()
-        {
-            google.ClearPlayerStats();
-            foreach (long summonerId in Global.players.Keys)
-            {
-                List<RecentGame> statGames = mongo.getRecentGamesForPlayer(summonerId);
-                PlayerStats stats = converter.BuildPlayerStats(BuildGameStats(statGames));
-                google.AddPlayerStats(stats);
-            }
-        }
-
-        public void UploadChampionStats()
-        {
-            foreach (int championId in Global.champions.Keys)
-            {
-                List<MatchDetails> matches = GetMatchesWithChampion(championId);
-
-                if (matches.Count > 0)
-                {
-                    ChampionStats stats = converter.BuildChampionStats(championId, matches);
-                    google.AddChampionStats(stats);
-                }
-
-                Console.WriteLine($"{matches.Count} found for champion {championId} aka {Global.getChampionName(championId)}");
-            }
-        }
-
         public void UploadCompetitiveChampionStats()
         {
-            List<ComparativeChampionStats> statsList = new List<ComparativeChampionStats>();
+            List<CompetitiveStats> statsList = new List<CompetitiveStats>();
 
             foreach (int championId in Global.champions.Keys)
             {
-                List<MatchDetails> matches = GetMatchesWithChampion(championId);
-
-                matches.RemoveAll(m => !m.IsValid());
-
-                if (matches.Count > 0)
-                {
-                    Dictionary<long, List<GameStats>> playerStats = new Dictionary<long, List<GameStats>>(); //<SummonerID, [List of Recent Games]
-
-                    foreach (int summonerId in Global.players.Keys)
-                    {
-                        List<RecentGame> recentGames = mongo.GetRecentGamesForChampionAndSummoner(championId, summonerId);
-
-                        recentGames.RemoveAll(g =>
-                        {
-                            long gameId = g.gameId;
-                            MatchDetails match = mongo.GetMatch(gameId);
-
-                            if (match == null || !match.IsValid())
-                            {
-                                return true;
-                            }
-
-                            return false;
-                        });
-
-                        if (recentGames.Count > 0)
-                        {
-                            playerStats.Add(summonerId, BuildGameStats(recentGames));
-                        }
-                    }
-
-                    ComparativeChampionStats stats = converter.BuildCompetitiveChampionStats(championId, matches, playerStats);
-
-                    statsList.Add(stats);
-                }
+                statsList.Add(BuildCompetitiveChampionStats(championId));
             }
 
-            statsList = statsList.OrderByDescending(c => c.getNumFriendlyGames()).ToList();
+            statsList = statsList.OrderByDescending(c => c.totalCompetitiveGames).ToList();
 
-            google.ClearCompetitiveStats();
-            foreach (ComparativeChampionStats stats in statsList)
-            {
-                google.AddCompetitiveChampionStats(stats);
-            }
+            google.AddCompetitiveChampionStats2(statsList);
 
         }
 
-        private List<MatchDetails> GetMatchesWithChampion(int championId)
+        public CompetitiveStats BuildCompetitiveChampionStats(int championId)
+        {
+            MatchCollection matchCollection = GetMatchesWithChampion(championId);
+
+            if (matchCollection.Count > 0)
+            {
+                ChampionStats cStats = converter.buildChampionStats(championId, matchCollection);
+
+                List<PlayerChampionStats> pStatsList = new List<PlayerChampionStats>();
+                foreach (int summonerId in Global.players.Keys)
+                {
+                    List<RecentGame> recentGames = mongo.GetRecentGamesForChampionAndSummoner(championId, summonerId);
+
+                    List<long> recentGameIds = recentGames.ConvertAll<long>(g => g.gameId);
+
+                    MatchCollection playerMatches = matchCollection.FindAll(recentGameIds);
+
+                    if (playerMatches.Count > 0)
+                    {
+                        PlayerChampionStats pStats = converter.buildPlayerStats(summonerId, championId, playerMatches);
+                        pStatsList.Add(pStats);
+                    }
+
+                }
+
+                return new CompetitiveStats(cStats, pStatsList);
+            }
+
+            return null;
+        }
+
+
+        private MatchCollection GetMatchesWithChampion(int championId)
         {
             List<MatchDetails> matchesWithChampion = new List<MatchDetails>();
 
@@ -207,7 +175,7 @@ namespace ConsoleApplication1
                     matchesWithChampion.Add(match);
                 }
             }
-
+            
             List<RecentGame> games = mongo.GetRecentGamesForChampion(championId);
 
             foreach (RecentGame game in games)
@@ -220,20 +188,9 @@ namespace ConsoleApplication1
                 }
             }
 
-            return matchesWithChampion;
-        }
+            matchesWithChampion.RemoveAll(m => !m.IsValid());
 
-        private List<GameStats> BuildGameStats(List<RecentGame> games)
-        {
-            List<GameStats> gameRows = new List<GameStats>();
-
-            foreach (RecentGame game in games)
-            {
-                MatchDetails match = mongo.GetMatch(game.gameId);
-                gameRows.Add(converter.BuildGameStats(game, match));
-            }
-
-            return gameRows;
+            return new MatchCollection(matchesWithChampion);
         }
     }
 }
