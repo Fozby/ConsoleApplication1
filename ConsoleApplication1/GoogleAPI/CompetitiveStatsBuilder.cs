@@ -43,7 +43,7 @@ namespace ConsoleApplication1.GoogleAPI
             }
 
             stats.numGames = matchCollection.Count;
-            stats.win = (double)totalWins / stats.numGames;
+            stats.win = ((double)totalWins / stats.numGames) * 100;
             stats.kills = (double)totalIndividualData.kills / stats.numGames;
             stats.deaths = (double)totalIndividualData.deaths / stats.numGames;
             stats.assists = (double)totalIndividualData.assists / stats.numGames;

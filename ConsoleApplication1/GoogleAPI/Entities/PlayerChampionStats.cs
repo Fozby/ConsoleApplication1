@@ -1,9 +1,9 @@
 ﻿namespace ConsoleApplication1.GoogleAPI.Entities
 {
-    class PlayerChampionStats
+    public class PlayerChampionStats
     {
-        public string summonerName { get; }
-        public ChampionStats championStats { get; }
+        public string summonerName { get; set; }
+        public ChampionStats championStats { get; set; }
         
         public PlayerChampionStats(string summonerName, ChampionStats championStats)
         {

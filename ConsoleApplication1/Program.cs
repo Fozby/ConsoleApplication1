@@ -11,6 +11,7 @@ using System.Threading;
 using System.Timers;
 using ConsoleApplication1.GoogleAPI.Entities;
 using ConsoleApplication1.GoogleAPI.DataObjects;
+using ConsoleApplication1.Database.GoogleCache;
 
 namespace ConsoleApplication1
 {
@@ -25,19 +26,7 @@ namespace ConsoleApplication1
         static void Main(string[] args)
         {
             Global.loadChampions(riot.getChampions()); //TODO store in mongodb to avoid an unnessary call
-            //collector.UploadChampionStats();
 
-            //ComparativeChampionStats stats = collector.BuildComparativeStats(25);
-
-            //collector.UploadCompetitiveChampionStats();
-
-            //Console.WriteLine("Adding recent games...");
-            //collector.CollectRecentGames();
-
-            //Cleanup();
-
-            //Console.ReadLine();
-            //return;
             double ONE_HOUR_TIMER = 60 * 60 * 1000;
             double FIVE_MINUTE_TIMER = 5 * 60 * 1000;
             double FIVE_HOUR_TIMER = 5 * 60 * 60 * 1000;

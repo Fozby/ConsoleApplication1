@@ -1,8 +1,12 @@
 ﻿TODO:
 
 - Google API call is timing out when we send all champion data (FIXED)
-- Dynamic thread waiting instead of every 1.3s
+- Dynamic thread waiting instead of every 1.3s, multiple threads when searching for recent games - need to synchronise mongo collection
 - Google sheet visuals for scoring systems
 - Another sheet for player stats, categorised somehow by tank/adc/apc/etc
 - Cache player / champion stats, shouldnt need to recalculate stats if #games hasent changed
 - Add bold to titles
+- Cache champion names
+- Only store summoner name in globals, lookup and cache summoner id and other names
+- Support name changing by only storing summonerId (cache)
+- Store 'last updated edition' in a DB, use this to see if we need to update the cache

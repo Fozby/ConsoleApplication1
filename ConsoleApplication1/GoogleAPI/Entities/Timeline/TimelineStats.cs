@@ -8,10 +8,10 @@ namespace ConsoleApplication1.GoogleAPI.Entities.Timeline
 {
     public class TimelineStats
     {
-        public TimelineStat zeroToTen { get; }
-        public TimelineStat tenToTwenty { get; }
-        public TimelineStat twentyToThirty { get; }
-        public TimelineStat thirtyToEnd { get; }
+        public TimelineStat zeroToTen { get; set; }
+        public TimelineStat tenToTwenty { get; set; }
+        public TimelineStat twentyToThirty { get; set; }
+        public TimelineStat thirtyToEnd { get; set; }
 
         public TimelineStats(TimelineStat zeroToTen, TimelineStat tenToTwenty, TimelineStat twentyToThirty, TimelineStat thirtyToEnd)
         {

@@ -2,7 +2,7 @@
 
 namespace ConsoleApplication1.GoogleAPI.Entities
 {
-    class CompetitiveStats
+    public class CompetitiveStats
     {
         public ChampionStats championStats { get; }
         public List<PlayerChampionStats> playerStats { get; }

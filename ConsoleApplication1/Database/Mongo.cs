@@ -1,10 +1,15 @@
-﻿using System;
+﻿using ConsoleApplication1.GoogleAPI.Entities;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
 using ConsoleApplication1.RiotAPI.Entities.RecentGames;
 using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
 using ConsoleApplication1.RiotAPI.Entities.FeaturedGames;
+using ConsoleApplication1.Database.GoogleCache;
+using MongoDB.Bson;
+using ConsoleApplication1.Database.Exceptions;
 
 namespace ConsoleApplication1.Database
 {
@@ -16,6 +21,10 @@ namespace ConsoleApplication1.Database
         private IMongoCollection<MatchDetails> matchCollection;
         private IMongoCollection<FeaturedGame> featuredGameCollection;
 
+        //Google entity caches
+        private IMongoCollection<ChampionStatsCache> championStatsCollection;
+        private IMongoCollection<PlayerChampionStatsCache> playerChampionStatsCollection;
+
         public Mongo()
         {
             theClient = new MongoClient("mongodb://localhost:27017");
@@ -23,6 +32,8 @@ namespace ConsoleApplication1.Database
             gameCollection = theDataBase.GetCollection<RecentGame>("Game_1");
             matchCollection = theDataBase.GetCollection<MatchDetails>("Match_1");
             featuredGameCollection = theDataBase.GetCollection<FeaturedGame>("FeaturedGame_1");
+            championStatsCollection = theDataBase.GetCollection<ChampionStatsCache>("ChampionStatsCollection_1");
+            playerChampionStatsCollection = theDataBase.GetCollection<PlayerChampionStatsCache>("PlayerChampionStatsCollection_1");
 
             handleIndexes();
         }
@@ -30,7 +41,7 @@ namespace ConsoleApplication1.Database
         private void handleIndexes()
         {
             //Add gameId as a Unique Index (Primary Key)
-            if (gameCollection.Indexes.List().ToList().Count == 0)
+            if (gameCollection.Indexes.List().ToList().Count == 1)
             {
                 CreateIndexOptions cio = new CreateIndexOptions();
                 cio.Unique = true;
@@ -42,20 +53,52 @@ namespace ConsoleApplication1.Database
             }
 
             //Add matchId as a Unique Index (Primary Key)
-            if (matchCollection.Indexes.List().ToList().Count == 0)
+            if (matchCollection.Indexes.List().ToList().Count == 1) 
             {
                 CreateIndexOptions cio = new CreateIndexOptions();
                 cio.Unique = true;
                 matchCollection.Indexes.CreateOne(Builders<MatchDetails>.IndexKeys.Ascending(_ => _.matchId), cio);
             }
-
+ 
             //Add gameId as a Unique Index (Primary Key)
-            if (featuredGameCollection.Indexes.List().ToList().Count == 0)
+            if (featuredGameCollection.Indexes.List().ToList().Count == 1)
             {
                 CreateIndexOptions cio = new CreateIndexOptions();
                 cio.Unique = true;
                 featuredGameCollection.Indexes.CreateOne(Builders<FeaturedGame>.IndexKeys.Ascending(_ => _.gameId), cio);
             }
+
+           
+            //looks like mongodb has 1 index by default that cant be dropped, so count == 1 ... maybe not?
+            if (championStatsCollection.Indexes.List().ToList().Count == 1)
+            {
+                CreateIndexOptions cio = new CreateIndexOptions();
+                cio.Unique = true;
+
+                ChampionStatsCache cache = new ChampionStatsCache();
+                ChampionStats stats = new ChampionStats("a");
+
+                championStatsCollection.Indexes.CreateOne(Builders<ChampionStatsCache>.IndexKeys.Ascending(_ => _.championStats.championName), cio);
+            }
+
+
+            if (playerChampionStatsCollection.Indexes.List().ToList().Count == 1)
+            {
+                CreateIndexOptions cio = new CreateIndexOptions();
+                cio.Unique = true;
+
+                IndexKeysDefinition<PlayerChampionStatsCache> championName = Builders<PlayerChampionStatsCache>.IndexKeys.Ascending(_ => _.playerStats.championStats.championName);
+                IndexKeysDefinition<PlayerChampionStatsCache> summonerName = Builders<PlayerChampionStatsCache>.IndexKeys.Ascending(_ => _.playerStats.summonerName);
+
+                playerChampionStatsCollection.Indexes.CreateOne(Builders<PlayerChampionStatsCache>.IndexKeys.Combine(championName, summonerName), cio);
+            }
+
+        }
+
+        public void ClearCache()
+        {
+            championStatsCollection.DeleteMany(Builders<ChampionStatsCache>.Filter.Empty);
+            playerChampionStatsCollection.DeleteMany(Builders<PlayerChampionStatsCache>.Filter.Empty);
         }
 
         public bool insertGame(RecentGame game)
@@ -297,6 +340,139 @@ namespace ConsoleApplication1.Database
 
             var games = featuredGameCollection.Find(filter).ToList();
             return games;
+        }
+
+        public bool InsertChampionStats(ChampionStats stats)
+        {
+            try
+            {
+                ChampionStatsCache cache = new ChampionStatsCache(stats);
+
+                championStatsCollection.InsertOne(cache);
+
+                return true;
+            }
+            catch (MongoWriteException e)
+            {
+                if (e.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                {
+                    //Comment out for now, too much spam
+                    //Console.WriteLine("Error adding record");
+                }
+                else
+                {
+                    //Console.WriteLine($"Unhandled exception inserting Cache for champion: [{game.gameId}]. {e}");
+                    throw e;
+                }
+            }
+
+            return false;
+        }
+
+        public ChampionStats GetChampionStats(int championId, int count)
+        {
+            ChampionStatsCache cache = GetChampionStatsCache(championId);
+
+            if (cache == null)
+            {
+                return null;
+            }
+
+            if (count > cache.edition)
+            {
+                DeleteChampionStatsCache(championId);
+                return null;
+            }
+
+            return cache.championStats;
+        }
+
+        private void DeleteChampionStatsCache(int championId)
+        {
+            string championName = Global.getChampionName(championId);
+
+            var filter = Builders<ChampionStatsCache>.Filter.Eq("championStats.championName", championName);
+
+            championStatsCollection.DeleteOne(filter);
+        }
+
+        private ChampionStatsCache GetChampionStatsCache(int championId)
+        {
+            string championName = Global.getChampionName(championId);
+
+            var filter = Builders<ChampionStatsCache>.Filter.Eq("championStats.championName", championName);
+
+            return championStatsCollection.Find(filter).FirstOrDefault();
+        }
+
+        public bool InsertPlayerChampionStats(PlayerChampionStats stats)
+        {
+            try
+            {
+                PlayerChampionStatsCache cache = new PlayerChampionStatsCache(stats);
+
+                playerChampionStatsCollection.InsertOne(cache);
+
+                return true;
+            }
+            catch (MongoWriteException e)
+            {
+                if (e.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                {
+                    //Comment out for now, too much spam
+                    //Console.WriteLine("Error adding record");
+                }
+                else
+                {
+                    throw e;
+                }
+            }
+
+            return false;
+        }
+
+        public PlayerChampionStats GetPlayerChampionStats(int summonerId, int championId, int count)
+        {
+            PlayerChampionStatsCache cache = GetPlayerChampionStatsCache(summonerId, championId);
+
+            if (cache == null)
+            {
+                return null;
+               // throw new CacheNotFoundException();
+            }
+
+            if (count > cache.edition)
+            {
+                DeletePlayerChampionStatsCache(summonerId, championId);
+                return null;
+                //throw new StaleCacheException();
+            }
+
+            return cache.playerStats;
+        }
+
+        private void DeletePlayerChampionStatsCache(int summonerId, int championId)
+        {
+            string championName = Global.getChampionName(championId);
+            string summonerName = Global.GetPlayerName(summonerId);
+
+            var builder = Builders<PlayerChampionStatsCache>.Filter;
+            var filter = builder.Eq("playerStats.summonerName", summonerName)
+                            & builder.Eq("playerStats.championStats.championName", championName);
+
+            playerChampionStatsCollection.DeleteOne(filter);
+        }
+
+        private PlayerChampionStatsCache GetPlayerChampionStatsCache(int summonerId, int championId)
+        {
+            string championName = Global.getChampionName(championId);
+            string summonerName = Global.GetPlayerName(summonerId);
+
+            var builder = Builders<PlayerChampionStatsCache>.Filter;
+            var filter = builder.Eq("playerStats.summonerName", summonerName)
+                            & builder.Eq("playerStats.championStats.championName", championName);
+
+            return playerChampionStatsCollection.Find(filter).FirstOrDefault();
         }
     }
 }

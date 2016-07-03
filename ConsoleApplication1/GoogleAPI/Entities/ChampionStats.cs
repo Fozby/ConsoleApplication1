@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace ConsoleApplication1.GoogleAPI.Entities
 {
-    class ChampionStats
+    public class ChampionStats
     {
-        public string championName { get; }
+        public string championName { get; set; }
 
         public int numGames { get; set; }
         public double win { get; set; }

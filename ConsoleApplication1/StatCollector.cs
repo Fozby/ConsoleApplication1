@@ -118,10 +118,13 @@ namespace ConsoleApplication1
         {
             List<CompetitiveStats> statsList = new List<CompetitiveStats>();
 
+            Console.WriteLine($"Starting {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
             foreach (int championId in Global.champions.Keys)
             {
                 statsList.Add(BuildCompetitiveChampionStats(championId));
             }
+            Console.WriteLine($"Finished {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
+
 
             statsList = statsList.OrderByDescending(c => c.totalCompetitiveGames).ToList();
 
@@ -135,7 +138,13 @@ namespace ConsoleApplication1
 
             if (matchCollection.Count > 0)
             {
-                ChampionStats cStats = converter.buildChampionStats(championId, matchCollection);
+                ChampionStats cStats = mongo.GetChampionStats(championId, matchCollection.Count);
+
+                if (cStats == null)
+                {
+                    cStats = converter.buildChampionStats(championId, matchCollection);
+                    mongo.InsertChampionStats(cStats);
+                }
 
                 List<PlayerChampionStats> pStatsList = new List<PlayerChampionStats>();
                 foreach (int summonerId in Global.players.Keys)
@@ -148,7 +157,14 @@ namespace ConsoleApplication1
 
                     if (playerMatches.Count > 0)
                     {
-                        PlayerChampionStats pStats = converter.buildPlayerStats(summonerId, championId, playerMatches);
+                        PlayerChampionStats pStats = mongo.GetPlayerChampionStats(summonerId, championId, playerMatches.Count);
+
+                        if (pStats == null)
+                        {
+                            pStats = converter.buildPlayerStats(summonerId, championId, playerMatches);
+                            mongo.InsertPlayerChampionStats(pStats);
+                        }
+
                         pStatsList.Add(pStats);
                     }
 
