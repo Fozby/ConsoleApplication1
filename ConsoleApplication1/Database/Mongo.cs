@@ -387,7 +387,7 @@ namespace ConsoleApplication1.Database
             return cache.championStats;
         }
 
-        private void DeleteChampionStatsCache(int championId)
+        public void DeleteChampionStatsCache(int championId)
         {
             string championName = Global.getChampionName(championId);
 
@@ -451,7 +451,7 @@ namespace ConsoleApplication1.Database
             return cache.playerStats;
         }
 
-        private void DeletePlayerChampionStatsCache(int summonerId, int championId)
+        public void DeletePlayerChampionStatsCache(int summonerId, int championId)
         {
             string championName = Global.getChampionName(championId);
             string summonerName = Global.GetPlayerName(summonerId);

@@ -1,4 +1,5 @@
 ﻿using ConsoleApplication1.Database;
+using ConsoleApplication1.Database.Exceptions;
 using ConsoleApplication1.GoogleAPI;
 using ConsoleApplication1.GoogleAPI.DataObjects;
 using ConsoleApplication1.GoogleAPI.Entities;
@@ -138,11 +139,22 @@ namespace ConsoleApplication1
 
             if (matchCollection.Count > 0)
             {
-                ChampionStats cStats = mongo.GetChampionStats(championId, matchCollection.Count);
+                ChampionStats cStats;
 
-                if (cStats == null)
+                try
+                {
+                    cStats = mongo.GetChampionStats(championId, matchCollection.Count);
+                }
+                catch (CacheNotFoundException e)
                 {
                     cStats = converter.buildChampionStats(championId, matchCollection);
+                    mongo.InsertChampionStats(cStats);
+                }
+                catch (StaleCacheException e)
+                {
+                    cStats = converter.buildChampionStats(championId, matchCollection);
+
+                    mongo.DeleteChampionStatsCache(championId);
                     mongo.InsertChampionStats(cStats);
                 }
 
