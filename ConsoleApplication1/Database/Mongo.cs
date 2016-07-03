@@ -375,13 +375,13 @@ namespace ConsoleApplication1.Database
 
             if (cache == null)
             {
-                return null;
+                throw new CacheNotFoundException("no cache");
             }
 
             if (count > cache.edition)
             {
-                DeleteChampionStatsCache(championId);
-                return null;
+
+                throw new StaleCacheException("stale cache");
             }
 
             return cache.championStats;
@@ -437,15 +437,12 @@ namespace ConsoleApplication1.Database
 
             if (cache == null)
             {
-                return null;
-               // throw new CacheNotFoundException();
+                throw new CacheNotFoundException("no cache");
             }
 
             if (count > cache.edition)
             {
-                DeletePlayerChampionStatsCache(summonerId, championId);
-                return null;
-                //throw new StaleCacheException();
+                throw new StaleCacheException("stale cache");
             }
 
             return cache.playerStats;

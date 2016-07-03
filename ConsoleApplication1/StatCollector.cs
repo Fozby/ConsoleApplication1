@@ -169,11 +169,22 @@ namespace ConsoleApplication1
 
                     if (playerMatches.Count > 0)
                     {
-                        PlayerChampionStats pStats = mongo.GetPlayerChampionStats(summonerId, championId, playerMatches.Count);
+                        PlayerChampionStats pStats;
 
-                        if (pStats == null)
+                        try
+                        {
+                            pStats = mongo.GetPlayerChampionStats(summonerId, championId, playerMatches.Count);
+                        }
+                        catch (CacheNotFoundException e)
                         {
                             pStats = converter.buildPlayerStats(summonerId, championId, playerMatches);
+                            mongo.InsertPlayerChampionStats(pStats);
+                        }
+                        catch (StaleCacheException e)
+                        {
+                            pStats = converter.buildPlayerStats(summonerId, championId, playerMatches);
+
+                            mongo.DeletePlayerChampionStatsCache(summonerId, championId);
                             mongo.InsertPlayerChampionStats(pStats);
                         }
 

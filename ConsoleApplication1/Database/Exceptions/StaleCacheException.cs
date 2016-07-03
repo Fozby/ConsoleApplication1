@@ -8,7 +8,7 @@ namespace ConsoleApplication1.Database.Exceptions
 {
     public class StaleCacheException : Exception
     {
-        public StaleCacheException()
+        public StaleCacheException(string message) : base(message)
         {
 
         }

@@ -8,7 +8,7 @@ namespace ConsoleApplication1.Database.Exceptions
 {
     public class CacheNotFoundException : Exception
     {
-        public CacheNotFoundException()
+        public CacheNotFoundException(string message) : base(message)
         {
 
         }
