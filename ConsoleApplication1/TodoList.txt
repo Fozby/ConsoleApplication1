@@ -1,7 +1,7 @@
 ﻿TODO:
 
 - Google API call is timing out when we send all champion data (FIXED)
-- Dynamic thread waiting instead of every 1.3s, multiple threads when searching for recent games - need to synchronise mongo collection
+- Dynamic thread waiting instead of every 1.3s, multiple threads when searching for recent games - need to synchronise mongo collection (WIP)
 - Google sheet visuals for scoring systems
 - Another sheet for player stats, categorised somehow by tank/adc/apc/etc
 - Cache player / champion stats, shouldnt need to recalculate stats if #games hasent changed

@@ -31,26 +31,24 @@ namespace ConsoleApplication1
         public void CollectFeaturedGames()
         {
             Console.WriteLine("Querying featured games...");
-            //while (true)
-            //{
-                List<FeaturedGame> featuredGames = new List<FeaturedGame>();
+        
+            List<FeaturedGame> featuredGames = new List<FeaturedGame>();
 
-                try
-                {
-                    featuredGames = riot.getFeaturedGames();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Exception when querying for featured games. {e}");
-                }
+            try
+            {
+                featuredGames = riot.getFeaturedGames();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception when querying for featured games. {e}");
+            }
 
-                if (featuredGames.Count > 0)
-                {
-                    mongo.insertFeaturedGames(featuredGames);
-                }
-                Console.WriteLine($"[{DateTime.Now.ToString()}] Total featured games: {mongo.getFeaturedGameCount()}");
-            //    Thread.Sleep(300000);
-            //}
+            if (featuredGames.Count > 0)
+            {
+                mongo.insertFeaturedGames(featuredGames);
+            }
+            Console.WriteLine($"[{DateTime.Now.ToString()}] Total featured games: {mongo.getFeaturedGameCount()}");
+
         }
 
         public void CollectRecentGames()
@@ -59,7 +57,7 @@ namespace ConsoleApplication1
 
             try
             {
-                recentGames = riot.getRecentGamesForAllPlayers();
+                recentGames = riot.getRecentGames(Global.players.Keys.ToList());
             }
             catch (Exception e)
             {

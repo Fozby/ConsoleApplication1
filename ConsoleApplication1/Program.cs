@@ -12,6 +12,10 @@ using System.Timers;
 using ConsoleApplication1.GoogleAPI.Entities;
 using ConsoleApplication1.GoogleAPI.DataObjects;
 using ConsoleApplication1.Database.GoogleCache;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Linq;
+using ConsoleApplication1.RiotAPI.Exceptions;
 
 namespace ConsoleApplication1
 {
@@ -25,6 +29,13 @@ namespace ConsoleApplication1
 
         static void Main(string[] args)
         {
+
+            //RiotRequestManager rrm = new RiotRequestManager();
+
+            //List<RecentGame> games = rrm.GetAllRecentGames(Global.players.Keys.ToList());
+
+
+            //Console.ReadLine();
             Global.loadChampions(riot.getChampions()); //TODO store in mongodb to avoid an unnessary call
 
             double ONE_HOUR_TIMER = 60 * 60 * 1000;
@@ -58,66 +69,6 @@ namespace ConsoleApplication1
             featuredGamesTimer.Start();
             uploadTimer.Start();
             Console.ReadLine();
-   
-
-            //while (true)
-            //{
-            //    Console.WriteLine("Insert command");
-            //    string input = Console.ReadLine();
-
-            //    if (input == "featured")
-            //    {
-            //        collector.CollectFeaturedGames();
-            //    }
-            //    else if (input == "player")
-            //    {
-            //        collector.UploadPlayerStats();
-            //    }
-            //    else if (input == "champion")
-            //    {
-            //        collector.UploadChampionStats();
-            //    }
-            //    else if (input == "competitive")
-            //    {
-            //        collector.UploadCompetitiveChampionStats();
-            //    }
-            //    else if (input == "short")
-            //    {
-            //        List<RecentGame> shortGames = mongo.GetShortGames();
-            //        Dictionary<string, int> foo = new Dictionary<string, int>();
-
-            //        foreach (RecentGame game in shortGames)
-            //        {
-            //            long summId = game.summonerId;
-            //            string name = Global.GetPlayerName(summId);
-
-            //            if (foo.ContainsKey(name))
-            //            {
-            //                int count;
-            //                foo.TryGetValue(name, out count);
-            //                count++;
-
-            //                foo.Remove(name);
-            //                foo.Add(name, count);
-            //            }
-            //            else
-            //            {
-            //                foo.Add(name, 1);
-            //            }
-
-            //            Console.WriteLine(JsonConvert.SerializeObject(game, Formatting.Indented));
-            //        }
-
-            //        foreach (string name in foo.Keys)
-            //        {
-            //            int count;
-            //            foo.TryGetValue(name, out count);
-            //            Console.WriteLine($"{name} : {count}");
-            //        }
-
-            //        Console.WriteLine($"{mongo.GetShortGames().Count}");
-            //    }
-            //}
         }
 
         private static void CollectRecentGames(object source, ElapsedEventArgs e)

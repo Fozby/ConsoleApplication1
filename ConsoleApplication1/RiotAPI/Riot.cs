@@ -1,6 +1,7 @@
 ﻿using ConsoleApplication1.RiotAPI.Entities.FeaturedGames;
 using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
 using ConsoleApplication1.RiotAPI.Entities.RecentGames;
+using ConsoleApplication1.RiotAPI.Exceptions;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -12,17 +13,26 @@ namespace ConsoleApplication1.RiotAPI
     class Riot
     {
         private const string API_KEY = "defcd602-52e5-4349-817c-2b3cd73e32b5"; 
-        //private const string API_KEY = "9b995c6c-7e5a-4c7a-b905-aab1928af045"; 
-
         private const string REGION = "oce";
-
         private const string BASE_URI = "https://" + REGION + ".api.pvp.net/";
-        private const string RECENT_GAMES_RESOURCE = "api/lol/" + REGION + "/v1.3/game/by-summoner/{0}/recent?api_key=" + API_KEY;
-        private const string MATCH_RESOURCE = "api/lol/" + REGION + "/v2.2/match/{0}?api_key=" + API_KEY;
         private const string CHAMPION_RESOURCE = "api/lol/static-data/" + REGION + "/v1.2/champion?api_key=" + API_KEY;
         private const string FEATURED_GAMES_RESOURCE = "observer-mode/rest/featured?api_key=" + API_KEY;
 
         private RestClient myRestClient = new RestClient(BASE_URI);
+
+
+        /*
+            Strangling Riot Requests to run through RiotRequestManager, supporting multithreaded async calls.
+            Methods moved:
+            - GetRecentGames()
+            - GetMatch()
+
+            Methods still to move:
+            - GetFeaturedGames()
+            - GetChampions()
+            - GetSummoners() - not implemented yet
+        */
+        RiotRequestManager requestManager = new RiotRequestManager();
 
         public List<FeaturedGame> getFeaturedGames()
         {
@@ -42,41 +52,16 @@ namespace ConsoleApplication1.RiotAPI
             }
         }
 
-        public List<RecentGame> getRecentGames(long summonerId)
+        public List<RecentGame> getRecentGames(List<long> summonerIds)
         {
-            string resource = String.Format(RECENT_GAMES_RESOURCE, summonerId);
-            Response_RecentGames response = RiotApiRequest<Response_RecentGames>(resource);
-
-            List<RecentGame> games = response?.games ?? new List<RecentGame>(); // don't die on null response
-
-            List<RecentGame> aramGames = games.FindAll(g => g.gameMode == "ARAM");
-
-            foreach (RecentGame game in aramGames)
-            {
-                game.summonerId = summonerId;
-            }
-
-            return aramGames;
-        }
-
-        public List<RecentGame> getRecentGamesForAllPlayers()
-        {
-            List<RecentGame> games = new List<RecentGame>();
-
-            foreach (long summonerId in Global.players.Keys)
-            {
-                Console.WriteLine($"Finding recent games for {Global.GetPlayerName(summonerId)}");
-                games.AddRange(getRecentGames(summonerId));
-            }
-
-            return games;
+            return requestManager.GetAllRecentGames(summonerIds);
         }
 
         public MatchDetails getMatch(long gameId)
         {
-            string resource = String.Format(MATCH_RESOURCE, gameId);
-            return RiotApiRequest<MatchDetails>(resource);
+            return requestManager.getMatch(gameId);
         }
+
         public ChampionList getChampions()
         {
             return RiotApiRequest<ChampionList>(CHAMPION_RESOURCE);
@@ -84,8 +69,6 @@ namespace ConsoleApplication1.RiotAPI
 
         private T RiotApiRequest<T>(string resource) where T : new()
         {
-            Thread.Sleep(1300);
-
             RestRequest request = new RestRequest(resource, Method.GET);
             IRestResponse<T> response = myRestClient.Execute<T>(request);
 

@@ -117,7 +117,7 @@
     <Compile Include="GoogleAPI\GoogleSheets.cs" />
     <Compile Include="GoogleAPI\CompetitiveStatsBuilder.cs" />
     <Compile Include="Objects\Data.cs" />
-    <Compile Include="RiotAPI\DataNotFoundException.cs" />
+    <Compile Include="RiotAPI\Exceptions\DataNotFoundException.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\ChampionDto.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\ChampionList.cs" />
     <Compile Include="RiotAPI\Entities\FeaturedGames\FeaturedGame.cs" />
@@ -140,6 +140,7 @@
     <Compile Include="RiotAPI\Entities\MatchObjects\Timeline.cs" />
     <Compile Include="RiotAPI\Entities\MatchObjects\ParticipantTimelineData.cs" />
     <Compile Include="GoogleAPI\Entities\PlayerChampionStats.cs" />
+    <Compile Include="RiotAPI\Exceptions\RateLimitException.cs" />
     <Compile Include="RiotAPI\Riot.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\FellowPlayer.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\RecentGame.cs" />
@@ -149,6 +150,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RiotAPI\RiotHttpStatusCode.cs" />
+    <Compile Include="RiotAPI\RiotRequest.cs" />
+    <Compile Include="RiotAPI\RiotRequestManager.cs" />
     <Compile Include="StatCollector.cs" />
   </ItemGroup>
   <ItemGroup>
