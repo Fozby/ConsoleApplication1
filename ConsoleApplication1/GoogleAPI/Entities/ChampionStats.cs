@@ -30,6 +30,11 @@ namespace ConsoleApplication1.GoogleAPI.Entities
         public double physCreepDamage { get; set; }
         public double crowdControl { get; set; }
 
+        public double dmgPerDeath { get; set; }
+
+        public double playerDmgPerMin { get; set; }
+        public double creepDmgPerMin { get; set; }
+
         public TimelineStats goldStats { get; set; }
         public TimelineStats creepStats { get; set; }
 

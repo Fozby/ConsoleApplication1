@@ -49,7 +49,7 @@ namespace ConsoleApplication1.GoogleAPI
             stats.assists = (double)totalIndividualData.assists / stats.numGames;
             stats.goldPerMin = (double)totalIndividualData.gold / totalMatchMins;
             stats.creepsPerMin = (double)totalIndividualData.creepsKilled / totalMatchMins;
-            stats.killParticipation = (double)totalIndividualData.takedowns / totalTeamData.takedowns;
+            stats.killParticipation = ((double)totalIndividualData.takedowns / totalTeamData.kills) * 100;
             stats.pctGold = ((double)totalIndividualData.gold / totalTeamData.gold) * 100;
             stats.pctCreepDamage = ((double)totalIndividualData.creepDamage / totalTeamData.creepDamage) *100;
             stats.pctPlayerDamage = ((double)totalIndividualData.playerDamage / totalTeamData.playerDamage) *100;
@@ -63,6 +63,9 @@ namespace ConsoleApplication1.GoogleAPI
             stats.crowdControl = totalIndividualData.crowdControl / stats.numGames;
             stats.goldStats = matchCollection.buildGoldTimelineStats(championId);
             stats.creepStats = matchCollection.buildCreepTimelineStats(championId);
+            stats.dmgPerDeath = totalIndividualData.damageTaken / totalIndividualData.deaths;
+            stats.playerDmgPerMin = (double)totalIndividualData.playerDamage / totalMatchMins;
+            stats.creepDmgPerMin = (double)totalIndividualData.creepDamage / totalMatchMins;
 
             return stats;
         }

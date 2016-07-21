@@ -65,8 +65,10 @@ namespace ConsoleApplication1
                 throw e;
             }
 
+
             int numAdded = mongo.insertGames(recentGames);
             Console.WriteLine($"Collected {numAdded} games. Total Recent Games: {mongo.getAllRecentGames().Count}");
+            int i = 3;
         }
 
         public void PrintRatings()
@@ -120,10 +122,24 @@ namespace ConsoleApplication1
             Console.WriteLine($"Starting {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
             foreach (int championId in Global.champions.Keys)
             {
-                statsList.Add(BuildCompetitiveChampionStats(championId));
+                //statsList.Add(BuildCompetitiveChampionStats(championId));
             }
             Console.WriteLine($"Finished {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
 
+            Console.WriteLine($"Starting 2 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
+
+            List<MatchDetails> matches = mongo.GetAramMatches();
+            matches.RemoveAll(m => !m.IsValid());
+
+            foreach (int championId in Global.champions.Keys)
+            {
+                List<MatchDetails> championMatches = matches.FindAll(m => m.participants.Find(p => p.championId == championId) != null);
+
+                MatchCollection mc = new MatchCollection(championMatches);
+
+                statsList.Add(BuildCompetitiveChampionStatsInner(championId, mc));
+            }
+            Console.WriteLine($"Finished 2 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
 
             statsList = statsList.OrderByDescending(c => c.totalCompetitiveGames).ToList();
 
@@ -131,11 +147,10 @@ namespace ConsoleApplication1
 
         }
 
-        public CompetitiveStats BuildCompetitiveChampionStats(int championId)
-        {
-            MatchCollection matchCollection = GetMatchesWithChampion(championId);
 
-            if (matchCollection.Count > 0)
+        public CompetitiveStats BuildCompetitiveChampionStatsInner(int championId, MatchCollection matchCollection)
+        {
+            if (matchCollection.matches.Count > 0)
             {
                 ChampionStats cStats;
 
@@ -197,6 +212,12 @@ namespace ConsoleApplication1
             return null;
         }
 
+        public CompetitiveStats BuildCompetitiveChampionStats(int championId)
+        {
+            MatchCollection matchCollection = GetMatchesWithChampion(championId);
+
+            return BuildCompetitiveChampionStatsInner(championId, matchCollection);
+        }
 
         private MatchCollection GetMatchesWithChampion(int championId)
         {

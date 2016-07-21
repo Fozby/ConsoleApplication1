@@ -95,7 +95,14 @@ namespace ConsoleApplication1.RiotAPI
             {
                 Task<Response_RecentGames> t = new Task<Response_RecentGames>(() =>
                 {
-                    return RiotApiRequest<Response_RecentGames>(GetRecentGamesResource(summonerId));
+                    Response_RecentGames response = RiotApiRequest<Response_RecentGames>(GetRecentGamesResource(summonerId));
+
+                    foreach (RecentGame g in response.games)
+                    {
+                        g.summonerId = summonerId;
+                    }
+
+                    return response;
                 });
 
                 tasks.Add(t);

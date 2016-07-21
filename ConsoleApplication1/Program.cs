@@ -30,9 +30,7 @@ namespace ConsoleApplication1
         static void Main(string[] args)
         {
 
-            //RiotRequestManager rrm = new RiotRequestManager();
-
-            //List<RecentGame> games = rrm.GetAllRecentGames(Global.players.Keys.ToList());
+            //mongo.ClearCache();
 
 
             //Console.ReadLine();
@@ -62,7 +60,7 @@ namespace ConsoleApplication1
             Cleanup();
 
             //collector.UploadPlayerStats();
-            //collector.PrintRatings();
+            collector.PrintRatings();
             collector.UploadCompetitiveChampionStats();
 
             recentGamesTimer.Start();

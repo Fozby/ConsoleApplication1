@@ -53,11 +53,18 @@ namespace ConsoleApplication1.Database
             }
 
             //Add matchId as a Unique Index (Primary Key)
-            if (matchCollection.Indexes.List().ToList().Count == 1) 
+            if (matchCollection.Indexes.List().ToList().Count == 2) 
             {
                 CreateIndexOptions cio = new CreateIndexOptions();
                 cio.Unique = true;
                 matchCollection.Indexes.CreateOne(Builders<MatchDetails>.IndexKeys.Ascending(_ => _.matchId), cio);
+
+
+                cio = new CreateIndexOptions();
+                IndexKeysDefinition<MatchDetails> championIds = Builders<MatchDetails>.IndexKeys.Ascending("participants.championId");
+                IndexKeysDefinition<MatchDetails> matchMode = Builders<MatchDetails>.IndexKeys.Ascending(_ => _.matchMode);
+
+                matchCollection.Indexes.CreateOne(Builders<MatchDetails>.IndexKeys.Combine(championIds, matchMode), cio);
             }
  
             //Add gameId as a Unique Index (Primary Key)
@@ -253,6 +260,28 @@ namespace ConsoleApplication1.Database
             }
 
             return null;
+        }
+
+        public List<MatchDetails> GetMatchesWithChampion(int championId)
+        {
+            var filter = Builders<MatchDetails>.Filter.ElemMatch(match => match.participants, participant => participant.championId == championId);
+
+            return matchCollection.Find(filter).ToList();
+        }
+
+        public List<MatchDetails> GetAramMatches()
+        {
+           return matchCollection.Find(Builders<MatchDetails>.Filter.Eq("matchMode", "ARAM")).ToList();
+
+        }
+
+        public List<MatchDetails> GetARAMWithChampion(int championId)
+        {
+            var builder = Builders<MatchDetails>.Filter;
+            var filter = builder.ElemMatch(g => g.participants, g => g.championId == championId) &
+                            builder.Eq("matchMode", "ARAM");
+
+            return matchCollection.Find(filter).ToList();
         }
 
         public long getMatchCount()
