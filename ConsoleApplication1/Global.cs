@@ -49,7 +49,6 @@ namespace ConsoleApplication1
             {SUMMONER_ID_MEWBULA, "Mewbula" },
             {SUMMONER_ID_DOESIT, "Doesit" },
             {SUMMONER_ID_LYCAN, "Lycan" }
-
         };
 
         public static void loadChampions(ChampionList championList)

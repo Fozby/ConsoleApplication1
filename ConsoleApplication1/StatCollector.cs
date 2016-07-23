@@ -115,18 +115,14 @@ namespace ConsoleApplication1
             }
         }
 
+        public void UploadPlayerStats()
+        {
+
+        }
+
         public void UploadCompetitiveChampionStats()
         {
             List<CompetitiveStats> statsList = new List<CompetitiveStats>();
-
-            Console.WriteLine($"Starting {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
-            foreach (int championId in Global.champions.Keys)
-            {
-                //statsList.Add(BuildCompetitiveChampionStats(championId));
-            }
-            Console.WriteLine($"Finished {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
-
-            Console.WriteLine($"Starting 2 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
 
             List<MatchDetails> matches = mongo.GetAramMatches();
             matches.RemoveAll(m => !m.IsValid());
@@ -137,18 +133,15 @@ namespace ConsoleApplication1
 
                 MatchCollection mc = new MatchCollection(championMatches);
 
-                statsList.Add(BuildCompetitiveChampionStatsInner(championId, mc));
+                statsList.Add(BuildCompetitiveChampionStats(championId, mc));
             }
-            Console.WriteLine($"Finished 2 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
 
             statsList = statsList.OrderByDescending(c => c.totalCompetitiveGames).ToList();
 
-            google.AddCompetitiveChampionStats2(statsList);
-
+            google.AddCompetitiveChampionStats(statsList);
         }
 
-
-        public CompetitiveStats BuildCompetitiveChampionStatsInner(int championId, MatchCollection matchCollection)
+        public CompetitiveStats BuildCompetitiveChampionStats(int championId, MatchCollection matchCollection)
         {
             if (matchCollection.matches.Count > 0)
             {
@@ -210,13 +203,6 @@ namespace ConsoleApplication1
             }
 
             return null;
-        }
-
-        public CompetitiveStats BuildCompetitiveChampionStats(int championId)
-        {
-            MatchCollection matchCollection = GetMatchesWithChampion(championId);
-
-            return BuildCompetitiveChampionStatsInner(championId, matchCollection);
         }
 
         private MatchCollection GetMatchesWithChampion(int championId)

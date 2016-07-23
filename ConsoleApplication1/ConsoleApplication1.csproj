@@ -108,6 +108,7 @@
     <Compile Include="Database\GoogleCache\ChampionStatsCache.cs" />
     <Compile Include="Database\GoogleCache\PlayerChampionStatsCache.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="GoogleAPI\Entities\PlayerStats.cs" />
     <Compile Include="Objects\MatchCollection.cs" />
     <Compile Include="GoogleAPI\Entities\Timeline\TimelineStat.cs" />
     <Compile Include="GoogleAPI\Entities\Timeline\TimelineStats.cs" />
