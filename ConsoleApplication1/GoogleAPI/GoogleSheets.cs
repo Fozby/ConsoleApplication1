@@ -50,7 +50,7 @@ namespace ConsoleApplication1.GoogleAPI
             });
         }
 
-        public void AddPlayerStats(PlayerChampionStats stats)
+        public void AddPlayerStats(List<PlayerStats> stats)
         {
             List<object> _params = new List<object>();
             _params.Add(stats);
@@ -74,16 +74,6 @@ namespace ConsoleApplication1.GoogleAPI
             callMethod("addCompetitiveChampionStats", _params);
         }
 
-        public void ClearCompetitiveStats()
-        {
-            callMethod("resetCompetitiveChampionStats", new List<Object>());
-        }
-
-        public void ClearPlayerStats()
-        {
-            callMethod("resetPlayerStats", new List<Object>());
-        }
-
         private void callMethod(string method, List<Object> _params)
         {
             // Create an execution request object.
@@ -97,12 +87,7 @@ namespace ConsoleApplication1.GoogleAPI
             try
             {
                 // Make the API request.
-                Console.WriteLine($"Starting at {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
-
                 Operation op = runReq.Execute();
-
-                Console.WriteLine($"Finished at {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
-
 
                 if (op.Error != null)
                 {
@@ -142,9 +127,9 @@ namespace ConsoleApplication1.GoogleAPI
                     // an Apps Script Object with String keys and values.
                     // It is most convenient to cast the return value as a JSON
                     // JObject (folderSet).
-                    string s = (string)op.Response["result"];
+                    string result = (string)op.Response["result"];
 
-                    Console.WriteLine("Found spreadsheet: [" + s + "]");
+                    Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - {result}");
                 }
             }
             catch (Google.GoogleApiException e)

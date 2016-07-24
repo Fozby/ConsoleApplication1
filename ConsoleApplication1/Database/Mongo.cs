@@ -13,7 +13,7 @@ using ConsoleApplication1.Database.Exceptions;
 
 namespace ConsoleApplication1.Database
 {
-    class Mongo
+    public class Mongo
     { 
         private MongoClient theClient;
         private IMongoDatabase theDataBase;
@@ -262,6 +262,29 @@ namespace ConsoleApplication1.Database
             return null;
         }
 
+        public void InjectSummonerIntoMatch(long matchId, int championId, long summonerId)
+        {
+            MatchDetails match = GetMatch(matchId);
+
+            List<Participant> participants = match.participants;
+
+            foreach (Participant p in participants)
+            {
+                if (p.championId == championId)
+                {
+                    p.summonerId = summonerId;
+                    break;
+                }
+            }
+
+            var filter = Builders<MatchDetails>.Filter.Eq("matchId", matchId);
+            var update = Builders<MatchDetails>.Update.Set("participants", participants);
+
+            UpdateResult result = matchCollection.UpdateOne(filter, update);
+
+            MatchDetails matchAfter = GetMatch(matchId);
+        }
+
         public List<MatchDetails> GetMatchesWithChampion(int championId)
         {
             var filter = Builders<MatchDetails>.Filter.ElemMatch(match => match.participants, participant => participant.championId == championId);
@@ -272,13 +295,21 @@ namespace ConsoleApplication1.Database
         public List<MatchDetails> GetAramMatches()
         {
            return matchCollection.Find(Builders<MatchDetails>.Filter.Eq("matchMode", "ARAM")).ToList();
-
         }
 
         public List<MatchDetails> GetARAMWithChampion(int championId)
         {
             var builder = Builders<MatchDetails>.Filter;
             var filter = builder.ElemMatch(g => g.participants, g => g.championId == championId) &
+                            builder.Eq("matchMode", "ARAM");
+
+            return matchCollection.Find(filter).ToList();
+        }
+
+        public List<MatchDetails> GetARAMWithPlayer(long summonerId)
+        {
+            var builder = Builders<MatchDetails>.Filter;
+            var filter = builder.ElemMatch(g => g.participants, g => g.summonerId == summonerId) &
                             builder.Eq("matchMode", "ARAM");
 
             return matchCollection.Find(filter).ToList();
@@ -346,7 +377,7 @@ namespace ConsoleApplication1.Database
             UpdateResult result = featuredGameCollection.UpdateMany(filter, update);
         }
 
-        public bool isCorrectToCheckIfFeaturedGame(long gameStart, long gameEnd)
+        public bool IsFeaturedGameRecorded(long gameStart, long gameEnd)
         {
             var builder = Builders<FeaturedGame>.Filter;
             var filter = builder.Gt(g => g.gameStartTime, gameStart) 

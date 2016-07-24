@@ -10,6 +10,7 @@
 - Only store summoner name in globals, lookup and cache summoner id and other names
 - Support name changing by only storing summonerId (cache)
 - Store 'last updated edition' in a DB, use this to see if we need to update the cache
+- Store summonerId in matchDetails.participant - need to use RecentGames to calculate but then we shouldn't ever need RecentGames again
 
 Stats:
 Remove heal/phys player/phys creep/cc

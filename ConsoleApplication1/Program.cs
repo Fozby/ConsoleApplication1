@@ -29,10 +29,6 @@ namespace ConsoleApplication1
 
         static void Main(string[] args)
         {
-
-            //mongo.ClearCache();
-
-
             //Console.ReadLine();
             Global.loadChampions(riot.getChampions()); //TODO store in mongodb to avoid an unnessary call
 
@@ -55,14 +51,17 @@ namespace ConsoleApplication1
             uploadTimer.Interval = FIVE_HOUR_TIMER;
             uploadTimer.Enabled = true;
 
+            Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - Starting download for new Recent and Featured Games");
             collector.CollectRecentGames();
             collector.CollectFeaturedGames();
+            Console.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " - Performing data cleanup");
             Cleanup();
 
-            //collector.UploadPlayerStats();
-            collector.PrintRatings();
+            Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - Uploading data to google sheets");
+            collector.UploadPlayerStats();
             collector.UploadCompetitiveChampionStats();
 
+            Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - Starting periodic data retrieval timer");
             recentGamesTimer.Start();
             featuredGamesTimer.Start();
             uploadTimer.Start();
@@ -71,34 +70,50 @@ namespace ConsoleApplication1
 
         private static void CollectRecentGames(object source, ElapsedEventArgs e)
         {
-            Console.WriteLine($"Timer command to read recent games");
-            Cleanup();
+            Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - Automatic task to download Recent games");
             collector.CollectRecentGames();
+            Cleanup();
         }
 
         private static void CollectFeaturedGames(object source, ElapsedEventArgs e)
         {
-            Console.WriteLine($"Timer command to read featured games");
+            Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - Automatic task to download Featured games");
             collector.CollectFeaturedGames();
         }
 
         private static void UploadData(object source, ElapsedEventArgs e)
         {
-            Console.WriteLine($"Timer command to upload games");
-            //collector.UploadCompetitiveChampionStats();
+            Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - Automatic task to upload data");
+            collector.UploadCompetitiveChampionStats();
+            Cleanup();
         }
 
         static void Cleanup()
         {
             CleanupRecentGames();
             CleanupFeaturedGames();
+
+            AddSummonerIdsToMatches();
+        }
+
+        static void AddSummonerIdsToMatches()
+        {
+            List<RecentGame> flaggedGames = mongo.GetFlaggedRecentGames();
+
+            foreach(RecentGame game in flaggedGames)
+            {
+                long gameId = game.gameId;
+                int championId = game.championId;
+                long summonerId = game.summonerId;
+
+                mongo.InjectSummonerIntoMatch(gameId, championId, summonerId);
+            }
+
         }
 
         static void CleanupRecentGames()
         {
             List<RecentGame> recentGames = mongo.GetUnflaggedRecentGames();
-
-            Console.WriteLine($"Found {recentGames.Count} unflagged recent games");
 
             foreach (RecentGame recentGame in recentGames)
             {
@@ -119,7 +134,7 @@ namespace ConsoleApplication1
                     }
                     catch (DataNotFoundException e)
                     {
-                        Console.WriteLine($"No internal or riot record for {recentGame.gameId}. Deleting recent game");
+                        Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - No internal or riot record for {recentGame.gameId}. Deleting recent game");
                         //mongo.DeleteRecentGame(recentGame.gameId);
                     } 
                 }
@@ -133,8 +148,6 @@ namespace ConsoleApplication1
         static void CleanupFeaturedGames()
         {
             List<FeaturedGame> featuredGames = mongo.GetUnflaggedFeaturedGames();
-
-            Console.WriteLine($"Found {featuredGames.Count} unflagged featured games");
 
             foreach (FeaturedGame featuredGame in featuredGames)
             {
@@ -155,7 +168,7 @@ namespace ConsoleApplication1
                     }
                     catch (DataNotFoundException e)
                     {
-                        Console.WriteLine($"No internal or riot record for {featuredGame.gameId}. Match probably not uploaded yet.");
+                        Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - No internal or riot record for {featuredGame.gameId}. Match probably not uploaded yet.");
                         //mongo.deleteFeaturedGame(featuredGame.gameId);
                     }
                 }

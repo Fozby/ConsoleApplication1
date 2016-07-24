@@ -123,8 +123,6 @@ namespace ConsoleApplication1.RiotAPI
 
         private T RiotApiRequest<T>(string resource) where T : new()
         {
-            Console.WriteLine($"Request: {resource}");
-
             RestRequest request = new RestRequest(resource, Method.GET);
 
             bool success = false;
@@ -161,7 +159,7 @@ namespace ConsoleApplication1.RiotAPI
                     }
                     default:
                     {
-                        Console.Error.WriteLine($"Response returned status: {statusCode}");
+                        Console.Error.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - Response returned status: {statusCode}");
                         break;
                     }
                 }

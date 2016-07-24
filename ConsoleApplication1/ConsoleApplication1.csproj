@@ -109,6 +109,8 @@
     <Compile Include="Database\GoogleCache\PlayerChampionStatsCache.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="GoogleAPI\Entities\PlayerStats.cs" />
+    <Compile Include="GoogleAPI\Entities\Stats.cs" />
+    <Compile Include="GoogleAPI\PlayerStatsBuilder.cs" />
     <Compile Include="Objects\MatchCollection.cs" />
     <Compile Include="GoogleAPI\Entities\Timeline\TimelineStat.cs" />
     <Compile Include="GoogleAPI\Entities\Timeline\TimelineStats.cs" />
@@ -118,6 +120,7 @@
     <Compile Include="GoogleAPI\GoogleSheets.cs" />
     <Compile Include="GoogleAPI\CompetitiveStatsBuilder.cs" />
     <Compile Include="Objects\Data.cs" />
+    <Compile Include="Objects\RecentGameCollection.cs" />
     <Compile Include="RiotAPI\Exceptions\DataNotFoundException.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\ChampionDto.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\ChampionList.cs" />

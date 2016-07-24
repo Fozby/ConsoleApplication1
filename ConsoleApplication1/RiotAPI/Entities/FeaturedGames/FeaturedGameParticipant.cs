@@ -1,7 +1,7 @@
 ﻿
 namespace ConsoleApplication1.RiotAPI.Entities.FeaturedGames
 {
-    class FeaturedGameParticipant
+    public class FeaturedGameParticipant
     {
         public long championId { get; set; }
         public string summonerName { get; set; }

@@ -3,6 +3,7 @@ using ConsoleApplication1.Database.Exceptions;
 using ConsoleApplication1.GoogleAPI;
 using ConsoleApplication1.GoogleAPI.DataObjects;
 using ConsoleApplication1.GoogleAPI.Entities;
+using ConsoleApplication1.Objects;
 using ConsoleApplication1.RiotAPI;
 using ConsoleApplication1.RiotAPI.Entities.FeaturedGames;
 using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
@@ -19,19 +20,19 @@ namespace ConsoleApplication1
         private Riot riot;
         private Mongo mongo;
         private GoogleSheets google;
-        private CompetitiveStatsBuilder converter = new CompetitiveStatsBuilder();
-
+        private CompetitiveStatsBuilder competitiveStatsBuilder = new CompetitiveStatsBuilder();
+        private PlayerStatsBuilder playerStatsBuilder;
         public StatCollector(Mongo mongo, Riot riot, GoogleSheets google)
         {
             this.riot = riot;
             this.mongo = mongo;
             this.google = google;
+
+            this.playerStatsBuilder = new PlayerStatsBuilder(mongo);
         }
 
         public void CollectFeaturedGames()
-        {
-            Console.WriteLine("Querying featured games...");
-        
+        {        
             List<FeaturedGame> featuredGames = new List<FeaturedGame>();
 
             try
@@ -47,7 +48,7 @@ namespace ConsoleApplication1
             {
                 mongo.insertFeaturedGames(featuredGames);
             }
-            Console.WriteLine($"[{DateTime.Now.ToString()}] Total featured games: {mongo.getFeaturedGameCount()}");
+            Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - Total featured games: {mongo.getFeaturedGameCount()}");
 
         }
 
@@ -65,59 +66,24 @@ namespace ConsoleApplication1
                 throw e;
             }
 
-
             int numAdded = mongo.insertGames(recentGames);
-            Console.WriteLine($"Collected {numAdded} games. Total Recent Games: {mongo.getAllRecentGames().Count}");
-            int i = 3;
-        }
-
-        public void PrintRatings()
-        {
-            Dictionary<string, string> ratings = new Dictionary<string, string>();
-
-            foreach (long summonerId in Global.players.Keys)
-            {
-                List<RecentGame> games = mongo.getRecentGamesForPlayer(summonerId);
-
-                long numGames = games.Count;
-                long numFeatured = 0;
-
-                long numValidGames = 0;
-
-                foreach (RecentGame game in games)
-                {
-                    long gameId = game.gameId;
-
-                    MatchDetails match = mongo.GetMatch(gameId);
-                    
-                    long start = game.createDate;
-                    long end = start + (match.matchDuration * 1000); //match duration is in seconds, create date is milliseconds
-
-                    if (mongo.isCorrectToCheckIfFeaturedGame(start, end))// && game.IsSolo())
-                    {
-                        numValidGames++;
-
-                        if (mongo.isFeaturedGame(gameId))
-                        {
-                            numFeatured++;
-                        }
-                    }
-                }
-
-                double featuredPercent = (double)numFeatured / numValidGames;
-                string rating = $"{numFeatured} / {numValidGames} ({numGames}) {String.Format("{0:0.00}", featuredPercent)}%";
-                ratings.Add(Global.GetPlayerName(summonerId), rating);
-            }
-
-            foreach(KeyValuePair<string, string> kvp in ratings)
-            {
-                Console.WriteLine($"{kvp.Key} : {kvp.Value}");
-            }
+            Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - Collected {numAdded} recent games. Total Recent Games: {mongo.getAllRecentGames().Count}");
         }
 
         public void UploadPlayerStats()
         {
+            List<PlayerStats> playerStatsList = new List<PlayerStats>();
 
+            foreach (int summonerId in Global.players.Keys)
+            {
+                List<MatchDetails> matches = mongo.GetARAMWithPlayer(summonerId);
+                matches.RemoveAll(m => !m.IsValid());
+
+                PlayerStats pStats = playerStatsBuilder.buildPlayerStats(summonerId, new MatchCollection(matches));
+                playerStatsList.Add(pStats);
+            }
+
+            google.AddPlayerStats(playerStatsList);
         }
 
         public void UploadCompetitiveChampionStats()
@@ -153,12 +119,12 @@ namespace ConsoleApplication1
                 }
                 catch (CacheNotFoundException e)
                 {
-                    cStats = converter.buildChampionStats(championId, matchCollection);
+                    cStats = competitiveStatsBuilder.buildChampionStats(championId, matchCollection);
                     mongo.InsertChampionStats(cStats);
                 }
                 catch (StaleCacheException e)
                 {
-                    cStats = converter.buildChampionStats(championId, matchCollection);
+                    cStats = competitiveStatsBuilder.buildChampionStats(championId, matchCollection);
 
                     mongo.DeleteChampionStatsCache(championId);
                     mongo.InsertChampionStats(cStats);
@@ -183,12 +149,12 @@ namespace ConsoleApplication1
                         }
                         catch (CacheNotFoundException e)
                         {
-                            pStats = converter.buildPlayerStats(summonerId, championId, playerMatches);
+                            pStats = competitiveStatsBuilder.buildPlayerChampionStats(summonerId, championId, playerMatches);
                             mongo.InsertPlayerChampionStats(pStats);
                         }
                         catch (StaleCacheException e)
                         {
-                            pStats = converter.buildPlayerStats(summonerId, championId, playerMatches);
+                            pStats = competitiveStatsBuilder.buildPlayerChampionStats(summonerId, championId, playerMatches);
 
                             mongo.DeletePlayerChampionStatsCache(summonerId, championId);
                             mongo.InsertPlayerChampionStats(pStats);

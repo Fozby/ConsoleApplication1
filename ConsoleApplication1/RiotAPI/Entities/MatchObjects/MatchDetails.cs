@@ -43,6 +43,20 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
             return this.matchId.GetHashCode();
         }
 
+        public Data getChampionDataForPlayer(long summonerId)
+        {
+            Participant participant = participants.Find(p => p.summonerId == summonerId);
+
+            return getChampionData(participant.championId);
+        }
+
+        public Data getTeamDataForPlayer(long summonerId)
+        {
+            Participant participant = participants.Find(p => p.summonerId == summonerId);
+
+            return getTeamData(participant.championId);
+        }
+
         public Data getChampionData(int championId)
         {
             ParticipantStats pStats = GetStatsForChampion(championId);
@@ -68,6 +82,13 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
             return teamData;
         }
 
+        public bool DidPlayerWin(long summonerId)
+        {
+            Participant participant = participants.Find(p => p.summonerId == summonerId);
+
+            return participant.teamId == GetWinningTeam();
+        }
+
         public int GetTeamIdForChampion(int championId)
         {
             foreach (Participant participant in participants)
@@ -80,6 +101,13 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
 
             //TODO custom exceptions
             throw new ArgumentException($"championId not found in match: {matchId}");
+        }
+
+        public ParticipantStats GetStatsForPlayer(long summonerId)
+        {
+            Participant participant = participants.Find(p => p.summonerId == summonerId);
+
+            return GetStatsForChampion(participant.championId);
         }
 
         public ParticipantStats GetStatsForChampion(int championId)
@@ -95,6 +123,21 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
             //TODO custom exceptions 
             throw new ArgumentException($"championId not found in match: {matchId}");
         }
+
+        public ParticipantTimeline GetTimelineForPlayer(long summonerId)
+        {
+            foreach (Participant participant in participants)
+            {
+                if (participant.summonerId == summonerId)
+                {
+                    return participant.timeline;
+                }
+            }
+
+            //TODO custom exceptions 
+            throw new ArgumentException($"summonerId not found in match: {matchId}");
+        }
+
 
         public ParticipantTimeline GetTimelineForChampion(int championId)
         {

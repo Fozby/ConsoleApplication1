@@ -89,7 +89,7 @@ namespace ConsoleApplication1.RiotAPI
                         int retrySeconds;
                         if (!int.TryParse(retry, out retrySeconds)) retrySeconds = 10;
                         ++retrySeconds;
-                        Console.WriteLine($"You hit the hard limit, pause for {retrySeconds} seconds");
+                        Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - You hit the hard limit, pause for {retrySeconds} seconds");
                         Thread.Sleep(retrySeconds * 1000);
                         break;
                     }

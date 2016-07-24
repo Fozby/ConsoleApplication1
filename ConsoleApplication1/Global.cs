@@ -26,6 +26,7 @@ namespace ConsoleApplication1
         public const long SUMMONER_ID_MEWBULA = 5934357;
         public const long SUMMONER_ID_DOESIT = 466881;
         public const long SUMMONER_ID_LYCAN = 237034;
+        public const long SUMMONER_ID_DYNAMICENTRRRY = 1363551;
 
         public static Dictionary<int, string> champions = new Dictionary<int, string>();
   
@@ -48,7 +49,8 @@ namespace ConsoleApplication1
             {SUMMONER_ID_LA_SQUID, "La Squid" },
             {SUMMONER_ID_MEWBULA, "Mewbula" },
             {SUMMONER_ID_DOESIT, "Doesit" },
-            {SUMMONER_ID_LYCAN, "Lycan" }
+            {SUMMONER_ID_LYCAN, "Lycan" },
+            {SUMMONER_ID_DYNAMICENTRRRY, "DynamicEntrrry" }
         };
 
         public static void loadChampions(ChampionList championList)

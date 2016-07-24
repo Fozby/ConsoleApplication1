@@ -14,5 +14,7 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
         public ParticipantStats stats { get; set; }
         public int teamId { get; set; }
         public ParticipantTimeline timeline { get; set; }
+
+        public long summonerId { get; set; } //Custom attribute - has to be calculated from related Recent Games object
     }
 }
