@@ -138,15 +138,6 @@ namespace ConsoleApplication1.Database
             gameCollection.DeleteOne(filter);
         }
 
-        public List<RecentGame> GetShortGames()
-        {
-            var filter = Builders<RecentGame>.Filter.Lt(g => g.stats.timePlayed, 900);
-            var sort = Builders<RecentGame>.Sort.Ascending("championId").Ascending("summonerId").Ascending("gameId");
-
-            var games = gameCollection.Find(filter).Sort(sort).ToList();
-            return games;
-        }
-
         public int insertGames(List<RecentGame> games)
         {
             int numAdded = 0;
@@ -176,29 +167,12 @@ namespace ConsoleApplication1.Database
             return games;
         }
 
-        public List<RecentGame> getRecentGamesForPlayer(long summonerId)
-        {
-            var builder = Builders<RecentGame>.Filter;
-            var filter = builder.Eq("summonerId", summonerId);
-
-            var games = gameCollection.Find(filter).ToList();
-
-            return games;
-        }
-
-        public List<RecentGame> GetRecentGamesForChampion(int championId)
-        {
-            var builder = Builders<RecentGame>.Filter;
-            var filter = builder.Eq("championId", championId);
-
-            return gameCollection.Find(filter).ToList();
-        }
-
         public List<RecentGame> GetRecentGamesForChampionAndSummoner(int championId, long summonerId)
         {
             var builder = Builders<RecentGame>.Filter;
             var filter = builder.Eq("championId", championId) &
-                            builder.Eq("summonerId", summonerId);
+                            builder.Eq("summonerId", summonerId) &
+                            builder.Eq("gameMode", "ARAM");
 
             return gameCollection.Find(filter).ToList();
         }
@@ -306,13 +280,6 @@ namespace ConsoleApplication1.Database
             matchCollection.UpdateOne(matchFilter, matchUpdate);
         }
 
-        public List<MatchDetails> GetMatchesWithChampion(int championId)
-        {
-            var filter = Builders<MatchDetails>.Filter.ElemMatch(match => match.participants, participant => participant.championId == championId);
-
-            return matchCollection.Find(filter).ToList();
-        }
-
         public List<MatchDetails> GetAramMatches()
         {
            return matchCollection.Find(Builders<MatchDetails>.Filter.Eq("matchMode", "ARAM")).ToList();
@@ -373,15 +340,6 @@ namespace ConsoleApplication1.Database
         public long getFeaturedGameCount()
         {
             return featuredGameCollection.Count(Builders<FeaturedGame>.Filter.Empty);
-        }
-
-        public List<FeaturedGame> GetFeaturedGamesForChampion(int championId)
-        {
-            var builder = Builders<FeaturedGame>.Filter;
-            var filter = builder.ElemMatch(g => g.participants, g => g.championId == championId) &
-                            builder.Eq("hasMatch", true);
-
-            return featuredGameCollection.Find(filter).ToList();
         }
 
         public void deleteFeaturedGame(long gameId)

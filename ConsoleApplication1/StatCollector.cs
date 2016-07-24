@@ -170,37 +170,5 @@ namespace ConsoleApplication1
 
             return null;
         }
-
-        private MatchCollection GetMatchesWithChampion(int championId)
-        {
-            List<MatchDetails> matchesWithChampion = new List<MatchDetails>();
-
-            List<FeaturedGame> featuredGames = mongo.GetFeaturedGamesForChampion(championId);
-            foreach (FeaturedGame featuredGame in featuredGames)
-            {
-                MatchDetails match = mongo.GetMatch(featuredGame.gameId);
-
-                if (match!= null && !matchesWithChampion.Contains(match))
-                {
-                    matchesWithChampion.Add(match);
-                }
-            }
-            
-            List<RecentGame> games = mongo.GetRecentGamesForChampion(championId);
-
-            foreach (RecentGame game in games)
-            {
-                MatchDetails match = mongo.GetMatch(game.gameId);
-
-                if (match != null &&!matchesWithChampion.Contains(match))
-                {
-                    matchesWithChampion.Add(match);
-                }
-            }
-
-            matchesWithChampion.RemoveAll(m => !m.IsValid());
-
-            return new MatchCollection(matchesWithChampion);
-        }
     }
 }

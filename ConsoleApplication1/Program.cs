@@ -29,6 +29,8 @@ namespace ConsoleApplication1
 
         static void Main(string[] args)
         {
+            mongo.ClearCache();
+
             //Console.ReadLine();
             Global.loadChampions(riot.getChampions()); //TODO store in mongodb to avoid an unnessary call
 
