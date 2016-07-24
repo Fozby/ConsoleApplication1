@@ -25,6 +25,7 @@ namespace ConsoleApplication1.RiotAPI.Entities.RecentGames
         public int teamId { get; set; }
 
         public bool hasMatch { get; set; } = false;
+        public bool injectedSummonerId { get; set; } = false;
 
         public bool IsSolo()
         {

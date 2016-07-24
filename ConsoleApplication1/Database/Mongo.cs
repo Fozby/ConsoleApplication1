@@ -211,6 +211,21 @@ namespace ConsoleApplication1.Database
             return games;
         }
 
+        //Recent games have a mapping of summoner id to champion id
+        //Match details do not contain summoner id's (riot privacy)
+        //Therefore we use Recent Games to inject summoner id into match details
+        //This is very DB intensive, so after we inject the id, we mark the recent game as to not try injecting again
+        public List<RecentGame> GetRecentGamesWithUninjectedSummonerId()
+        {
+            var builder = Builders<RecentGame>.Filter;
+            var filter = builder.Eq("injectedSummonerId", BsonNull.Value) &
+                            builder.Eq("gameMode", "ARAM");
+
+            var games = gameCollection.Find(filter).ToList();
+
+            return games;
+        }
+
         public List<RecentGame> GetUnflaggedRecentGames()
         {
             var filter = Builders<RecentGame>.Filter.Ne("hasMatch", true);
@@ -277,12 +292,18 @@ namespace ConsoleApplication1.Database
                 }
             }
 
-            var filter = Builders<MatchDetails>.Filter.Eq("matchId", matchId);
-            var update = Builders<MatchDetails>.Update.Set("participants", participants);
+            //Flag the recent game so that we dont bother trying to do this again
+            var gameBuilder = Builders<RecentGame>.Filter;
+            var gameFilter = gameBuilder.Eq("gameId", matchId) &
+                            gameBuilder.Eq("summonerId", summonerId);
 
-            UpdateResult result = matchCollection.UpdateOne(filter, update);
+            var gameUpdate = Builders<RecentGame>.Update.Set("injectedSummonerId", true);
+            gameCollection.UpdateOne(gameFilter, gameUpdate);
 
-            MatchDetails matchAfter = GetMatch(matchId);
+            //Inject summonerId into MatchDetails for easier data manipulation later
+            var matchFilter = Builders<MatchDetails>.Filter.Eq("matchId", matchId);
+            var matchUpdate = Builders<MatchDetails>.Update.Set("participants", participants);
+            matchCollection.UpdateOne(matchFilter, matchUpdate);
         }
 
         public List<MatchDetails> GetMatchesWithChampion(int championId)

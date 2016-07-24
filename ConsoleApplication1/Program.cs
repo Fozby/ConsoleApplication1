@@ -92,13 +92,12 @@ namespace ConsoleApplication1
         {
             CleanupRecentGames();
             CleanupFeaturedGames();
-
             AddSummonerIdsToMatches();
         }
 
         static void AddSummonerIdsToMatches()
         {
-            List<RecentGame> flaggedGames = mongo.GetFlaggedRecentGames();
+            List<RecentGame> flaggedGames = mongo.GetRecentGamesWithUninjectedSummonerId();
 
             foreach(RecentGame game in flaggedGames)
             {
@@ -108,7 +107,6 @@ namespace ConsoleApplication1
 
                 mongo.InjectSummonerIntoMatch(gameId, championId, summonerId);
             }
-
         }
 
         static void CleanupRecentGames()

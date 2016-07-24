@@ -120,7 +120,6 @@
     <Compile Include="GoogleAPI\GoogleSheets.cs" />
     <Compile Include="GoogleAPI\CompetitiveStatsBuilder.cs" />
     <Compile Include="Objects\Data.cs" />
-    <Compile Include="Objects\RecentGameCollection.cs" />
     <Compile Include="RiotAPI\Exceptions\DataNotFoundException.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\ChampionDto.cs" />
     <Compile Include="RiotAPI\Entities\RecentGames\ChampionList.cs" />
