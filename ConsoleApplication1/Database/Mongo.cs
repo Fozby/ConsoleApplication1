@@ -177,6 +177,25 @@ namespace ConsoleApplication1.Database
             return gameCollection.Find(filter).ToList();
         }
 
+        public List<RecentGame> GetRecentGamesSummoner(int championId, long summonerId)
+        {
+            var builder = Builders<RecentGame>.Filter;
+            var filter = builder.Eq("championId", championId) &
+                            builder.Eq("summonerId", summonerId) &
+                            builder.Eq("gameMode", "ARAM");
+
+            return gameCollection.Find(filter).ToList();
+        }
+
+        public List<RecentGame> GetRecentGamesSummoner(long summonerId)
+        {
+            var builder = Builders<RecentGame>.Filter;
+            var filter = builder.Eq("summonerId", summonerId) &
+                            builder.Eq("gameMode", "ARAM");
+
+            return gameCollection.Find(filter).ToList();
+        }
+
         public List<RecentGame> GetFlaggedRecentGames()
         {
             var filter = Builders<RecentGame>.Filter.Eq("hasMatch", true);
@@ -192,7 +211,7 @@ namespace ConsoleApplication1.Database
         public List<RecentGame> GetRecentGamesWithUninjectedSummonerId()
         {
             var builder = Builders<RecentGame>.Filter;
-            var filter = builder.Eq("injectedSummonerId", BsonNull.Value) &
+            var filter = builder.Ne("injectedSummonerId", true) &
                             builder.Eq("gameMode", "ARAM");
 
             var games = gameCollection.Find(filter).ToList();
@@ -254,6 +273,11 @@ namespace ConsoleApplication1.Database
         public void InjectSummonerIntoMatch(long matchId, int championId, long summonerId)
         {
             MatchDetails match = GetMatch(matchId);
+
+            if (match == null)
+            {
+                return;
+            }
 
             List<Participant> participants = match.participants;
 

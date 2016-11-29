@@ -31,6 +31,7 @@ namespace ConsoleApplication1
         {
             mongo.ClearCache();
 
+
             //Console.ReadLine();
             Global.loadChampions(riot.getChampions()); //TODO store in mongodb to avoid an unnessary call
 
@@ -54,8 +55,8 @@ namespace ConsoleApplication1
             uploadTimer.Enabled = true;
 
             Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - Starting download for new Recent and Featured Games");
-            collector.CollectRecentGames();
             collector.CollectFeaturedGames();
+            collector.CollectRecentGames();
             Console.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " - Performing data cleanup");
             Cleanup();
 
@@ -66,7 +67,7 @@ namespace ConsoleApplication1
             Console.WriteLine($"{System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} - Starting periodic data retrieval timer");
             recentGamesTimer.Start();
             featuredGamesTimer.Start();
-            uploadTimer.Start();
+            //uploadTimer.Start();
             Console.ReadLine();
         }
 

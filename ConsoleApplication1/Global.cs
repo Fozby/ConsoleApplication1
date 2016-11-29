@@ -7,7 +7,7 @@ namespace ConsoleApplication1
 {
     class Global
     {
-        private const long SUMMONER_ID_ETARAM = 356367;
+        public const long SUMMONER_ID_ETARAM = 356367;
         private const long SUMMONER_ID_PHYTHE = 557862;
         private const long SUMMONER_ID_CELINAR = 692409;
         private const long SUMMONER_ID_MIROTICA = 464473;
@@ -27,6 +27,7 @@ namespace ConsoleApplication1
         public const long SUMMONER_ID_DOESIT = 466881;
         public const long SUMMONER_ID_LYCAN = 237034;
         public const long SUMMONER_ID_DYNAMICENTRRRY = 1363551;
+        public const long SUMMONER_ID_DANK_MEMER = 579597;
 
         public static Dictionary<int, string> champions = new Dictionary<int, string>();
   
@@ -50,7 +51,9 @@ namespace ConsoleApplication1
             {SUMMONER_ID_MEWBULA, "Mewbula" },
             {SUMMONER_ID_DOESIT, "Doesit" },
             {SUMMONER_ID_LYCAN, "Lycan" },
-            {SUMMONER_ID_DYNAMICENTRRRY, "DynamicEntrrry" }
+            {SUMMONER_ID_DYNAMICENTRRRY, "DynamicEntrrry" },
+            {SUMMONER_ID_DANK_MEMER, "Dank Memer" }
+
         };
 
         public static void loadChampions(ChampionList championList)

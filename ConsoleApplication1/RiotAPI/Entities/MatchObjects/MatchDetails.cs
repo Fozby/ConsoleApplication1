@@ -174,6 +174,11 @@ namespace ConsoleApplication1.RiotAPI.Entities.MatchObjects
                 {
                     return false;
                 }
+
+                if (participant.stats.totalDamageDealtToChampions == 0)
+                {
+                    return false;
+                }
             }
 
             return true;

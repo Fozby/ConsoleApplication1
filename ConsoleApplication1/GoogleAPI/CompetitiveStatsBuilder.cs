@@ -23,6 +23,8 @@ namespace ConsoleApplication1.GoogleAPI
             Data totalIndividualData = new Data();
             Data totalTeamData = new Data();
 
+            Double totalDmgPercent = 0;
+
             foreach (MatchDetails match in matchCollection.matches)
             {
                 Data individualData = match.getChampionData(championId);
@@ -30,7 +32,14 @@ namespace ConsoleApplication1.GoogleAPI
 
                 totalIndividualData = totalIndividualData.add(individualData);
                 totalTeamData = totalTeamData.add(teamData);
+                
+                Double dmgPercent = ((Double) individualData.playerDamage / teamData.playerDamage) * 100;
+
+                totalDmgPercent += dmgPercent;
+
             }
+
+            totalDmgPercent = totalDmgPercent / matchCollection.Count;
 
             long totalMatchMins = matchCollection.GetTotalMatchMins();
             int totalWins = matchCollection.GetNumberOfWins(championId);
@@ -47,7 +56,7 @@ namespace ConsoleApplication1.GoogleAPI
             stats.killParticipation = ((double)totalIndividualData.takedowns / totalTeamData.kills) * 100;
             stats.pctGold = ((double)totalIndividualData.gold / totalTeamData.gold) * 100;
             stats.pctCreepDamage = ((double)totalIndividualData.creepDamage / totalTeamData.creepDamage) * 100;
-            stats.pctPlayerDamage = ((double)totalIndividualData.playerDamage / totalTeamData.playerDamage) * 100;
+            stats.pctPlayerDamage = totalDmgPercent; /*((double)totalIndividualData.playerDamage / totalTeamData.playerDamage) * 100;*/
             stats.pctDamageTaken = ((double)totalIndividualData.damageTaken / totalTeamData.damageTaken) * 100;
             stats.pctKills = ((double)totalIndividualData.kills / totalTeamData.kills) * 100;
             stats.pctDeaths = ((double)totalIndividualData.deaths / totalTeamData.deaths) * 100;

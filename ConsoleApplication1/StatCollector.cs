@@ -10,7 +10,10 @@ using ConsoleApplication1.RiotAPI.Entities.MatchObjects;
 using ConsoleApplication1.RiotAPI.Entities.RecentGames;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 
 namespace ConsoleApplication1
@@ -93,16 +96,32 @@ namespace ConsoleApplication1
             List<MatchDetails> matches = mongo.GetAramMatches();
             matches.RemoveAll(m => !m.IsValid());
 
+
             foreach (int championId in Global.champions.Keys)
             {
                 List<MatchDetails> championMatches = matches.FindAll(m => m.participants.Find(p => p.championId == championId) != null);
 
                 MatchCollection mc = new MatchCollection(championMatches);
 
-                statsList.Add(BuildCompetitiveChampionStats(championId, mc));
+                CompetitiveStats stats = BuildCompetitiveChampionStats(championId, mc);
+
+                //If no matches for a champion, null is returned
+                if (stats != null)
+                {
+                    statsList.Add(stats);
+                }
+
             }
 
             statsList = statsList.OrderByDescending(c => c.totalCompetitiveGames).ToList();
+
+            int reduction = 30;
+            int count = statsList.Count();
+            statsList.RemoveRange(count - reduction, reduction);
+
+            String s = Newtonsoft.Json.JsonConvert.SerializeObject(statsList);
+            int size = s.Length;
+            Console.WriteLine("Packet size: " + size);
 
             google.AddCompetitiveChampionStats(statsList);
         }

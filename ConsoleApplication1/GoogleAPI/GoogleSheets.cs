@@ -58,18 +58,11 @@ namespace ConsoleApplication1.GoogleAPI
             callMethod("addPlayerStats", _params);
         }
 
-        public void AddChampionStats(ChampionStats stats)
-        {
-            List<object> _params = new List<object>();
-            _params.Add(stats);
-
-            callMethod("addFeaturedStats", _params);
-        }
-
         public void AddCompetitiveChampionStats(List<CompetitiveStats> stats)
         {
             List<object> _params = new List<object>();
             _params.Add(stats);
+           
 
             callMethod("addCompetitiveChampionStats", _params);
         }
